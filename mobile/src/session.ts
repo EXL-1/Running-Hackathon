@@ -3,12 +3,7 @@
  * primer has been shown, and today's baseline answer. Nothing is persisted yet
  * — the screens read it so the Tap Run flow can skip steps already satisfied.
  */
-export type CoachId =
-  | "mum"
-  | "ex-female"
-  | "ex-male"
-  | "sergeant"
-  | "coach";
+export type CoachId = "mum" | "ex-female" | "ex-male" | "sergeant" | "coach";
 
 export type Coach = {
   id: CoachId;
@@ -21,12 +16,12 @@ export const coaches: Coach[] = [
   {
     id: "ex-female",
     name: "The Ex (female)",
-    descriptor: "Cool, dry, has seen your Strava",
+    descriptor: "Approval, but only on her terms",
   },
   {
     id: "ex-male",
     name: "The Ex (male)",
-    descriptor: "Smug, casual, never out of breath",
+    descriptor: "Sure you said a slower target",
   },
   { id: "sergeant", name: "Drill Sergeant", descriptor: "No excuses, ever" },
   { id: "coach", name: "Classic Coach", descriptor: "Calm and clear" },
