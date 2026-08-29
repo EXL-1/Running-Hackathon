@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { switchPlayer } from "@/lib/player/actions";
 import { requirePlayer } from "@/lib/player/current";
-import { listRuns } from "@/lib/runs/service";
+import { getRunTotals, listRuns } from "@/lib/runs/service";
 
 export const metadata: Metadata = {
   title: "Your runs — Runaway",
@@ -25,8 +25,10 @@ function formatDuration(seconds: number) {
 
 export default async function DashboardPage() {
   const player = await requirePlayer();
-  const runs = await listRuns(player.id);
-  const totalPoints = runs.reduce((total, run) => total + run.points, 0);
+  const [runs, { runCount, totalPoints }] = await Promise.all([
+    listRuns(player.id),
+    getRunTotals(player.id),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
@@ -34,8 +36,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold">{player.username}</h1>
           <p className="text-muted-foreground text-sm">
-            {runs.length} run{runs.length === 1 ? "" : "s"} · {totalPoints}{" "}
-            points
+            {runCount} run{runCount === 1 ? "" : "s"} · {totalPoints} points
           </p>
         </div>
         <form action={switchPlayer}>
