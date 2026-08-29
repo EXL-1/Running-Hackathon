@@ -1,4 +1,5 @@
 import { Footprints, Ghost, HeartHandshake, Mic, Trophy, Zap } from "lucide-react";
+import Link from "next/link";
 
 import { ModeShowcase } from "@/components/landing/mode-showcase";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
@@ -60,9 +61,14 @@ export default function Home() {
             <Footprints className="size-5" />
             Runaway
           </span>
-          <Button size="sm" asChild>
-            <a href="#waitlist">Join the waitlist</a>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost" asChild>
+              <Link href="/start">Open the app</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <a href="#waitlist">Join the waitlist</a>
+            </Button>
+          </div>
         </div>
       </header>
 
