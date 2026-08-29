@@ -33,6 +33,10 @@ Point the app at an API the phone can reach — `localhost` is the phone itself:
 EXPO_PUBLIC_API_URL=http://192.168.1.20:3000 npx expo start
 ```
 
+The API sends no CORS headers, so `--web` only works if the bundle and the API
+share an origin — put a reverse proxy in front of both when testing in a
+browser. Native builds are unaffected.
+
 ## Coach voices
 
 Clips come from the same `EXPO_PUBLIC_API_URL` app's `/api/coach-voice`, which
