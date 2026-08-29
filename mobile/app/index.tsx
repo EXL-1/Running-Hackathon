@@ -1,20 +1,74 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
+import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 
-import { theme } from "../src/theme";
+import { JarLogo } from "../src/components/JarLogo";
+import { font, palette, theme } from "../src/theme";
 
-export default function Home() {
+const LAUNCH_MS = 1100;
+
+/**
+ * 00 — Launch. Plays once, never loops: the jar mark in its running pose, the
+ * wordmark, then the tagline, then straight to Home.
+ */
+export default function Launch() {
+  const router = useRouter();
+  const mark = useRef(new Animated.Value(0)).current;
+  const wordmark = useRef(new Animated.Value(0)).current;
+  const tagline = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(mark, {
+        toValue: 1,
+        duration: 420,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(wordmark, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(tagline, {
+        toValue: 1,
+        duration: 240,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    const handoff = setTimeout(() => router.replace("/home"), LAUNCH_MS);
+
+    return () => clearTimeout(handoff);
+  }, [mark, router, tagline, wordmark]);
+
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>Runaway</Text>
-      <Text style={styles.body}>
-        Native run tracking. Nothing here talks to the database yet — start with
-        the GPS check to confirm pace and distance look right on your phone.
-      </Text>
+      <Animated.View
+        style={{
+          opacity: mark,
+          transform: [
+            {
+              translateY: mark.interpolate({
+                inputRange: [0, 1],
+                outputRange: [10, 0],
+              }),
+            },
+          ],
+        }}
+      >
+        <JarLogo size={84} />
+      </Animated.View>
 
-      <Link href="/gps-test" style={styles.button}>
-        Open GPS test
-      </Link>
+      <Animated.View style={{ opacity: wordmark }}>
+        <Text style={styles.wordmark}>
+          Peanut <Text style={styles.wordmarkButter}>Butter</Text>
+        </Text>
+      </Animated.View>
+
+      <Animated.Text style={[styles.tagline, { opacity: tagline }]}>
+        Spread the pace.
+      </Animated.Text>
     </View>
   );
 }
@@ -23,30 +77,21 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.background,
-    padding: 24,
-    gap: 16,
+    alignItems: "center",
     justifyContent: "center",
+    gap: 12,
   },
-  title: {
+  wordmark: {
     color: theme.text,
-    fontSize: 40,
-    fontWeight: "800",
-    letterSpacing: -1,
+    fontFamily: font.display,
+    fontSize: 34,
   },
-  body: {
+  wordmarkButter: {
+    color: palette.peanutButter,
+  },
+  tagline: {
     color: theme.muted,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  button: {
-    marginTop: 8,
-    backgroundColor: theme.primary,
-    color: theme.primaryText,
-    fontSize: 17,
-    fontWeight: "700",
-    textAlign: "center",
-    paddingVertical: 16,
-    borderRadius: 999,
-    overflow: "hidden",
+    fontFamily: font.body,
+    fontSize: 15,
   },
 });

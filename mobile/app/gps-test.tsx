@@ -14,7 +14,7 @@ import {
   formatPace,
   MAX_ACCURACY_M,
 } from "@shared/tracking";
-import { theme } from "../src/theme";
+import { font, theme } from "../src/theme";
 import { useRunTracker } from "../src/useRunTracker";
 
 function Metric({
@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     color: theme.muted,
+    fontFamily: font.body,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -177,10 +178,10 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     color: theme.muted,
-    fontSize: 13,
-    fontWeight: "600",
+    fontFamily: font.data,
+    fontSize: 12,
     textTransform: "uppercase",
-    letterSpacing: 0.6,
+    letterSpacing: 1.2,
   },
   metricValueRow: {
     flexDirection: "row",
@@ -189,29 +190,30 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     color: theme.text,
-    fontSize: 44,
-    fontWeight: "800",
+    fontFamily: font.dataMedium,
+    fontSize: 40,
     fontVariant: ["tabular-nums"],
-    letterSpacing: -1,
   },
   metricUnit: {
     color: theme.muted,
+    fontFamily: font.bodySemi,
     fontSize: 15,
-    fontWeight: "600",
   },
   signal: {
     color: theme.muted,
+    fontFamily: font.body,
     fontSize: 13,
   },
   error: {
     color: theme.danger,
+    fontFamily: font.body,
     fontSize: 14,
     lineHeight: 20,
   },
   button: {
     marginTop: 8,
     backgroundColor: theme.primary,
-    borderRadius: 999,
+    borderRadius: theme.radius,
     paddingVertical: 18,
     alignItems: "center",
   },
@@ -225,8 +227,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: theme.primaryText,
+    fontFamily: font.display,
     fontSize: 18,
-    fontWeight: "800",
   },
   buttonStopText: {
     color: theme.danger,
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: theme.muted,
+    fontFamily: font.bodySemi,
     fontSize: 15,
-    fontWeight: "600",
   },
 });

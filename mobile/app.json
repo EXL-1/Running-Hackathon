@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Runaway",
-    "slug": "runaway",
-    "scheme": "runaway",
+    "name": "Peanut Butter",
+    "slug": "peanut-butter",
+    "scheme": "peanutbutter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.runaway.app",
+      "bundleIdentifier": "com.peanutbutter.app",
       "infoPlist": {
         "UIBackgroundModes": [
           "location",
@@ -19,9 +19,9 @@
       }
     },
     "android": {
-      "package": "com.runaway.app",
+      "package": "com.peanutbutter.app",
       "adaptiveIcon": {
-        "backgroundColor": "#111318",
+        "backgroundColor": "#1E140D",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -37,10 +37,18 @@
       "expo-secure-store",
       "expo-audio",
       [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1E140D",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160
+        }
+      ],
+      [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Runaway uses your location to track pace and distance while you run.",
-          "locationWhenInUsePermission": "Runaway uses your location to track pace and distance while you run.",
+          "locationAlwaysAndWhenInUsePermission": "Peanut Butter uses your location to coach your pace while you run.",
+          "locationWhenInUsePermission": "Peanut Butter uses your location to coach your pace while you run.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true
