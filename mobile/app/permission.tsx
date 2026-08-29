@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 
 import { JarLogo } from "../src/components/JarLogo";
 import { Body, Button, Screen, Title } from "../src/components/ui";
+import { usePlayer } from "../src/player";
 import { session } from "../src/session";
 
 /**
@@ -11,10 +12,11 @@ import { session } from "../src/session";
  */
 export default function Permission() {
   const router = useRouter();
+  const { player } = usePlayer();
 
   function proceed() {
     session.primerSeen = true;
-    router.replace(session.coach ? "/baseline" : "/coach");
+    router.replace(player?.coachVoiceId ? "/baseline" : "/coach");
   }
 
   return (

@@ -3,10 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatDistanceKm, formatDuration, formatPace } from "@shared/tracking";
-import type { LineTrigger } from "@shared/voices";
+import { coachRunMode, type LineTrigger } from "@shared/voices";
 import { JarLogo } from "../src/components/JarLogo";
 import { Screen } from "../src/components/ui";
-import { session } from "../src/session";
+import { usePlayer } from "../src/player";
+import { DEFAULT_AIM_PACE_S_PER_KM, session } from "../src/session";
 import { font, theme } from "../src/theme";
 import { useCoachVoice } from "../src/useCoachVoice";
 import { useRunTracker } from "../src/useRunTracker";
@@ -23,9 +24,12 @@ const TRACE_POINTS = 24;
  */
 export default function Run() {
   const router = useRouter();
+  const { player, stats, finishRun } = usePlayer();
   const tracker = useRunTracker();
   const started = useRef(false);
+  const startedAt = useRef(new Date().toISOString());
   const [trace, setTrace] = useState<number[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (started.current) {
@@ -46,7 +50,8 @@ export default function Run() {
     setTrace((current) => [...current, livePace].slice(-TRACE_POINTS));
   }, [livePace]);
 
-  const target = session.baselinePaceSecondsPerKm;
+  const target = player?.targetPaceSPerKm ?? DEFAULT_AIM_PACE_S_PER_KM;
+  const personalBest = stats?.personalBest?.avgPaceSPerKm ?? null;
   const drift = livePace === null ? 0 : livePace - target;
   const onTarget = Math.abs(drift) <= 10;
   const zoneOffset = Math.max(0, Math.min(1, 0.5 + drift / 120));
@@ -61,7 +66,7 @@ export default function Run() {
       ? "start"
       : drift > 10
         ? "behind"
-        : livePace <= session.personalBestSecondsPerKm
+        : personalBest !== null && livePace <= personalBest
           ? "pb-in-sight"
           : "ahead";
 
@@ -78,8 +83,32 @@ export default function Run() {
             ? "“You're drifting. Give me ten seconds back.”"
             : "“That's quicker than usual. Keep it honest.”";
 
-  function finish() {
+  async function finish() {
     tracker.stop();
+
+    const distanceM = Math.round(tracker.distanceMeters);
+    const durationS = Math.round(tracker.elapsedMs / 1000);
+
+    // A run with no distance or no clock is a false start, not a run.
+    if (distanceM > 0 && durationS > 0) {
+      try {
+        await finishRun({
+          mode: player?.coachVoiceId ? coachRunMode(player.coachVoiceId) : "cheer",
+          distanceM,
+          durationS,
+          startedAt: startedAt.current,
+          coachVoiceId: player?.coachVoiceId ?? undefined,
+          baseline: session.baseline,
+        });
+      } catch (cause) {
+        setSaveError(
+          cause instanceof Error ? cause.message : "Could not save that run.",
+        );
+
+        return;
+      }
+    }
+
     router.replace({
       pathname: "/summary",
       params: {
@@ -152,12 +181,12 @@ export default function Run() {
         <Text style={styles.captionText}>{caption}</Text>
       </View>
 
-      {tracker.error ? (
-        <Text style={styles.error}>{tracker.error}</Text>
+      {tracker.error ?? saveError ? (
+        <Text style={styles.error}>{tracker.error ?? saveError}</Text>
       ) : null}
 
       <Pressable
-        onPress={finish}
+        onPress={() => void finish()}
         style={({ pressed }) => [styles.finish, pressed && styles.pressed]}
       >
         <Text style={styles.finishText}>Finish</Text>

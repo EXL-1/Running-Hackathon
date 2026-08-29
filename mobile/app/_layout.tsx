@@ -17,6 +17,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 
+import { PlayerProvider } from "../src/player";
 import { font, theme } from "../src/theme";
 
 SplashScreen.preventAutoHideAsync();
@@ -43,7 +44,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <PlayerProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -57,6 +58,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="username" />
         <Stack.Screen name="home" />
         <Stack.Screen name="permission" />
         <Stack.Screen name="coach" />
@@ -64,6 +66,6 @@ export default function RootLayout() {
         <Stack.Screen name="run" options={{ gestureEnabled: false }} />
         <Stack.Screen name="summary" />
       </Stack>
-    </>
+    </PlayerProvider>
   );
 }

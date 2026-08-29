@@ -1,11 +1,13 @@
 /**
- * In-memory run setup: which coach persona is selected, whether the location
- * primer has been shown, and today's baseline answer. Nothing is persisted yet
- * — the screens read it so the Tap Run flow can skip steps already satisfied.
+ * Coach personas and the run setup that only matters until the run ends. What
+ * a player keeps — their username, coach and runs — lives in Supabase behind
+ * `src/api.ts`; the primer flag and today's baseline answer stay here.
  */
 import { coachVoices, type CoachId, type CoachLine } from "@shared/voices";
 
-export type { CoachId };
+import type { BaselineAnswer } from "./api";
+
+export type { BaselineAnswer, CoachId };
 
 export type Coach = {
   id: CoachId;
@@ -31,14 +33,15 @@ export const coaches: Coach[] = coachVoices.map((voice) => ({
   lines: voice.lines,
 }));
 
-export type BaselineAnswer = "faster" | "slower" | "on-target";
+export function findCoach(id: CoachId | null | undefined) {
+  return coaches.find((coach) => coach.id === id) ?? null;
+}
+
+/** Aim pace for a player who hasn't set a target yet: 5:32 /km. */
+export const DEFAULT_AIM_PACE_S_PER_KM = 332;
 
 export const session = {
-  coach: null as Coach | null,
   primerSeen: false,
   openStravaOnStart: false,
   baseline: "on-target" as BaselineAnswer,
-  baselinePaceSecondsPerKm: 332,
-  personalBestSecondsPerKm: 348,
-  personalBestLabel: "5K · 12 Aug",
 };

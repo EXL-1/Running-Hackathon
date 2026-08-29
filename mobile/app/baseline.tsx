@@ -4,7 +4,13 @@ import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 import { formatPace } from "@shared/tracking";
 import { Button, Chip, Eyebrow, Screen, Title } from "../src/components/ui";
-import { session, type BaselineAnswer } from "../src/session";
+import { usePlayer } from "../src/player";
+import {
+  DEFAULT_AIM_PACE_S_PER_KM,
+  findCoach,
+  session,
+  type BaselineAnswer,
+} from "../src/session";
 import { font, theme } from "../src/theme";
 
 /**
@@ -13,24 +19,36 @@ import { font, theme } from "../src/theme";
  */
 export default function Baseline() {
   const router = useRouter();
+  const { player, patch } = usePlayer();
   const [openStrava, setOpenStrava] = useState(session.openStravaOnStart);
+  const aimPace = player?.targetPaceSPerKm ?? DEFAULT_AIM_PACE_S_PER_KM;
+  const coach = findCoach(player?.coachVoiceId);
 
   function begin(answer: BaselineAnswer) {
     session.baseline = answer;
     session.openStravaOnStart = openStrava;
+
+    // First run for this username: the aim pace it ran against becomes the
+    // target the coach compares every later run to.
+    if (player && player.targetPaceSPerKm === null) {
+      void patch({
+        goalKind: "increase_pace",
+        targetPaceSPerKm: aimPace,
+        onboardingCompleted: true,
+      });
+    }
+
     router.replace("/run");
   }
 
   return (
     <Screen>
-      <Eyebrow>
-        Baseline · {formatPace(session.baselinePaceSecondsPerKm)} /km
-      </Eyebrow>
+      <Eyebrow>Baseline · {formatPace(aimPace)} /km</Eyebrow>
       <Title>Faster or slower than usual today?</Title>
 
       <View style={styles.chips}>
         <Pressable onPress={() => router.push("/coach")}>
-          <Chip>Coach: {session.coach?.name ?? "Not set"} · Change</Chip>
+          <Chip>Coach: {coach?.name ?? "Not set"} · Change</Chip>
         </Pressable>
         <Chip>Voice cached, ready to run</Chip>
       </View>

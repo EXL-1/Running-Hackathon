@@ -17,28 +17,31 @@ The repo holds two clients on one backend:
 
 This is the priority test right now: does pace and distance look correct on a
 real phone? Use the run flow — Home → `Run` → baseline → the active run screen.
-The app writes **nothing** to the database — the session lives in memory and
-disappears when you close the app.
+Runs are saved against your username once you press Finish, so the personal best
+on Home comes back the next time you open the app.
 
 ### Setup (2 minutes)
 
 1. Install **Expo Go** on your phone (App Store / Play Store) and make sure it is
    on the latest version — Expo Go only runs the newest SDK, so an Expo Go that
    has not been updated shows "incompatible with this version of Expo Go" and
-   refuses to open the project. The app targets Expo SDK 57, which needs Expo Go
-   2.25.1 or newer (iOS 16+).
+   refuses to open the project. The app targets Expo SDK 54.
 2. Ask whoever is hosting the dev server (a teammate's laptop, or Devin's VM) to
    run:
    ```bash
    cd mobile
    npm install          # first time only
-   npx expo start --tunnel
+   EXPO_PUBLIC_API_URL=https://your-deployed-app npx expo start --tunnel
    ```
    `--tunnel` means your phone does **not** need to be on the same Wi-Fi as the
-   server — it works over mobile data, outdoors, mid-run.
+   server — it works over mobile data, outdoors, mid-run. `EXPO_PUBLIC_API_URL`
+   has to be a URL the phone can reach (a deployment, or the host's LAN IP such
+   as `http://192.168.1.20:3000`) — `localhost` is the phone itself.
 3. They send you the `exp://….exp.direct` link (or a QR code). Open the link on
    your phone, or scan the QR with the Camera app (iOS) / Expo Go (Android).
-4. The app loads in Expo Go on the Home screen.
+4. The app asks for a username the first time. Pick one (3–20 characters, lower
+   case letters, numbers and `_`) — there is no password, that name is the
+   account, and the phone remembers it after that.
 
 The dev server has to stay running while you test. Code changes reload on your
 phone within a couple of seconds, so bugs can be fixed while you stand there.
@@ -48,7 +51,8 @@ phone within a couple of seconds, so bugs can be fixed while you stand there.
 1. Go outside, or next to a window with a clear view of the sky. GPS is bad
    indoors.
 2. Tap **Run**, walk through the location primer and coach pick, then choose a
-   baseline answer. Allow the location permission when iOS/Android asks.
+   baseline answer. The coach is saved, so the next run skips straight past it.
+   Allow the location permission when iOS/Android asks.
 3. Keep the screen on and the app in the foreground, then move for at least
    3–5 minutes. Walking is fine.
 4. Tap **Finish**.
@@ -70,8 +74,10 @@ phone within a couple of seconds, so bugs can be fixed while you stand there.
 - [ ] The pace trace fills in left to right as fixes arrive.
 - [ ] **Finish** takes you to the summary, and distance, time and `Avg /km`
       there match the numbers you last saw on the run screen.
-- [ ] Nothing new appears in the database or on the web dashboard — the app
-      must not save anything yet.
+- [ ] The summary's Saved button shows your total runs and points, and the run
+      appears on the web dashboard for the same username.
+- [ ] Reopening the app goes straight to Home (no username prompt) and shows the
+      personal best from the runs you saved.
 
 ### Known limitation: locking the screen
 

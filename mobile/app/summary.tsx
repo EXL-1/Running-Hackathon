@@ -3,16 +3,18 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { formatDistanceKm, formatDuration, formatPace } from "@shared/tracking";
 import { Button, Eyebrow, Screen } from "../src/components/ui";
-import { session } from "../src/session";
+import { usePlayer } from "../src/player";
+import { DEFAULT_AIM_PACE_S_PER_KM } from "../src/session";
 import { font, theme } from "../src/theme";
 import { useCoachVoice } from "../src/useCoachVoice";
 
 /**
- * 06 — Summary. A run is saved locally and to Health before Strava is ever
- * offered, so the Strava action is secondary and optional.
+ * 06 — Summary. The run is already saved against the username by the time this
+ * screen opens, so the Strava action is secondary and optional.
  */
 export default function Summary() {
   const router = useRouter();
+  const { player, stats } = usePlayer();
   const params = useLocalSearchParams<{
     distanceMeters?: string;
     elapsedMs?: string;
@@ -23,12 +25,14 @@ export default function Summary() {
   const elapsedMs = Number(params.elapsedMs ?? 0);
   const paceSeconds = params.paceSeconds ? Number(params.paceSeconds) : null;
 
+  const target = player?.targetPaceSPerKm ?? DEFAULT_AIM_PACE_S_PER_KM;
+
   const verdict =
     paceSeconds === null
       ? "No pace"
-      : paceSeconds <= session.baselinePaceSecondsPerKm - 10
+      : paceSeconds <= target - 10
         ? "Faster than baseline"
-        : paceSeconds >= session.baselinePaceSecondsPerKm + 10
+        : paceSeconds >= target + 10
           ? "Slower than baseline"
           : "On target";
 
@@ -57,7 +61,14 @@ export default function Summary() {
       )}
 
       <View style={styles.actions}>
-        <Button label="Saved · Synced to Health ✓" onPress={() => {}} />
+        <Button
+          label={
+            stats === null
+              ? "Saved to your phone"
+              : `Saved · ${stats.runCount} runs · ${stats.totalPoints} points`
+          }
+          onPress={() => {}}
+        />
         <Button
           label="Send to Strava (optional)"
           tone="outline"
