@@ -3,29 +3,33 @@
  * primer has been shown, and today's baseline answer. Nothing is persisted yet
  * — the screens read it so the Tap Run flow can skip steps already satisfied.
  */
-export type CoachId = "mum" | "ex-female" | "ex-male" | "sergeant" | "coach";
+import { coachVoices, type CoachId } from "@shared/voices";
+
+export type { CoachId };
 
 export type Coach = {
   id: CoachId;
   name: string;
   descriptor: string;
+  /** Preview lines, in the voice's own ElevenLabs voice. */
+  lines: string[];
 };
 
-export const coaches: Coach[] = [
-  { id: "mum", name: "Mum", descriptor: "Warm, worried, proud of you" },
-  {
-    id: "ex-female",
-    name: "The Ex (female)",
-    descriptor: "Approval, but only on her terms",
-  },
-  {
-    id: "ex-male",
-    name: "The Ex (male)",
-    descriptor: "Sure you said a slower target",
-  },
-  { id: "sergeant", name: "Drill Sergeant", descriptor: "No excuses, ever" },
-  { id: "coach", name: "Classic Coach", descriptor: "Calm and clear" },
-];
+const descriptors: Record<CoachId, string> = {
+  mum: "Warm, worried, proud of you",
+  "ex-female": "Approval, but only on her terms",
+  "ex-male": "Sure you said a slower target",
+  sergeant: "No excuses, ever",
+  coach: "Calm and clear",
+  nan: "Sweet, and completely feral",
+};
+
+export const coaches: Coach[] = coachVoices.map((voice) => ({
+  id: voice.id,
+  name: voice.name,
+  descriptor: descriptors[voice.id],
+  lines: voice.lines,
+}));
 
 export type BaselineAnswer = "faster" | "slower" | "on-target";
 

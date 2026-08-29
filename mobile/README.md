@@ -13,6 +13,18 @@ npx expo start --tunnel   # phone on mobile data / different network
 Open the printed link in **Expo Go**. See [../TESTING.md](../TESTING.md) for the
 full test script.
 
+## Coach voices
+
+Clips come from the Next.js app's `/api/coach-voice`, which holds the ElevenLabs
+key, so point the app at it — a phone cannot reach the host's `localhost`:
+
+```bash
+EXPO_PUBLIC_API_URL=http://192.168.1.20:3000 npx expo start
+```
+
+Choosing a coach preloads that coach's clips (`src/voice.ts`) so a run can
+narrate without the network.
+
 ## Screens
 
 The seven screens from the design brief, in flow order:
@@ -43,6 +55,7 @@ it needs a map module in a development build; the pace trace panel stands in.
 - `app/` – expo-router file routes.
 - `src/components/ui.tsx` – Screen, Title, Body, Eyebrow, Chip, Button.
 - `src/session.ts` – in-memory run setup (coach, primer seen, baseline answer).
+- `src/voice.ts` – coach clip URLs and preloading, via `expo-audio`.
 - `src/useRunTracker.ts` – `expo-location` subscription, session state.
 - `src/theme.ts` – brand colour and type tokens.
 - `../shared/tracking.ts` – haversine distance, fix filtering and pace maths,

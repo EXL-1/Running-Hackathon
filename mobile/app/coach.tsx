@@ -1,20 +1,48 @@
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Eyebrow, Screen, Title } from "../src/components/ui";
-import { coaches, session, type CoachId } from "../src/session";
+import { coaches, session, type Coach, type CoachId } from "../src/session";
 import { font, theme } from "../src/theme";
+import { coachClipUrl, preloadCoachClips } from "../src/voice";
 
 /**
- * 03 — Choose your coach. Voice previews are stubbed until VoiceService is
- * wired in; selection is what the run flow reads.
+ * 03 — Choose your coach. The play button previews a real ElevenLabs line
+ * through the app's own API; choosing a coach warms the rest of that coach's
+ * clips so a run can narrate offline.
  */
 export default function ChooseCoach() {
   const router = useRouter();
   const [selected, setSelected] = useState<CoachId | null>(
     session.coach?.id ?? null,
   );
+  const [previewing, setPreviewing] = useState<CoachId | null>(null);
+  const player = useAudioPlayer();
+  const status = useAudioPlayerStatus(player);
+  const nextLine = useRef(0);
+
+  useEffect(() => {
+    if (status.didJustFinish) {
+      setPreviewing(null);
+    }
+  }, [status.didJustFinish]);
+
+  function preview(coach: Coach) {
+    if (previewing === coach.id && status.playing) {
+      player.pause();
+      setPreviewing(null);
+      return;
+    }
+
+    const line = previewing === coach.id ? nextLine.current : 0;
+    nextLine.current = (line + 1) % coach.lines.length;
+
+    player.replace({ uri: coachClipUrl(coach.id, line) });
+    player.play();
+    setPreviewing(coach.id);
+  }
 
   return (
     <Screen>
@@ -33,6 +61,7 @@ export default function ChooseCoach() {
               onPress={() => {
                 setSelected(coach.id);
                 session.coach = coach;
+                void preloadCoachClips(coach.id);
                 router.replace("/baseline");
               }}
               style={({ pressed }) => [
@@ -41,9 +70,22 @@ export default function ChooseCoach() {
                 pressed && styles.rowPressed,
               ]}
             >
-              <View style={styles.play}>
-                <View style={styles.playGlyph} />
-              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Preview ${coach.name}`}
+                onPress={() => preview(coach)}
+                style={({ pressed }) => [
+                  styles.play,
+                  previewing === coach.id && styles.playActive,
+                  pressed && styles.rowPressed,
+                ]}
+              >
+                {previewing === coach.id ? (
+                  <View style={styles.pauseGlyph} />
+                ) : (
+                  <View style={styles.playGlyph} />
+                )}
+              </Pressable>
 
               <View style={styles.rowText}>
                 <Text style={styles.name}>{coach.name}</Text>
@@ -95,6 +137,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  playActive: {
+    borderColor: theme.accent,
+  },
+  pauseGlyph: {
+    width: 9,
+    height: 11,
+    borderLeftWidth: 3,
+    borderRightWidth: 3,
+    borderLeftColor: theme.text,
+    borderRightColor: theme.text,
   },
   playGlyph: {
     width: 0,
