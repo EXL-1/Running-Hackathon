@@ -1,5 +1,4 @@
 import {
-  Activity,
   Flame,
   Gauge,
   MapPin,
@@ -9,8 +8,11 @@ import {
   Trophy,
 } from "lucide-react";
 
+import { JarMark } from "@/components/landing/jar-mark";
 import { ModeShowcase } from "@/components/landing/mode-showcase";
 import { PaceTimeline } from "@/components/landing/pace-timeline";
+import { PricingTable } from "@/components/landing/pricing-table";
+import { VoiceSampler } from "@/components/landing/voice-sampler";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,11 +92,11 @@ export default function Home() {
     <div className="flex flex-1 flex-col">
       <header className="bg-background/80 sticky top-0 z-50 border-b backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <span className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
-            <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-xl">
-              <Activity className="size-4.5" strokeWidth={2.75} />
+          <span className="flex items-center gap-2.5">
+            <JarMark />
+            <span className="font-display text-xl leading-none">
+              Peanut Butter
             </span>
-            Peanut Butter
           </span>
           <nav className="text-muted-foreground hidden items-center gap-8 text-sm md:flex">
             <a href="#voices" className="hover:text-foreground transition-colors">
@@ -102,6 +104,12 @@ export default function Home() {
             </a>
             <a href="#proof" className="hover:text-foreground transition-colors">
               Proof
+            </a>
+            <a
+              href="#pricing"
+              className="hover:text-foreground transition-colors"
+            >
+              Pricing
             </a>
             <a href="#how" className="hover:text-foreground transition-colors">
               How it works
@@ -132,11 +140,14 @@ export default function Home() {
                 <Timer className="size-3.5" />
                 Voice-led pace coaching
               </Badge>
-              <h1 className="mt-6 text-5xl leading-[0.95] font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+              <h1 className="font-display mt-6 text-5xl leading-[0.95] tracking-tight text-balance sm:text-6xl lg:text-7xl">
                 Be your
                 <br />
                 <span className="text-primary">personal best.</span>
               </h1>
+              <p className="text-[var(--ally)] mt-4 font-mono text-sm tracking-[0.18em] uppercase">
+                Spread the pace
+              </p>
               <p className="text-muted-foreground mt-6 max-w-xl text-lg leading-relaxed text-pretty">
                 Peanut Butter puts two voices on your run. Drift under your aim
                 pace and your arch-enemy gains ground. Hold it, and someone who
@@ -225,7 +236,7 @@ export default function Home() {
         <section id="voices" className="mx-auto w-full max-w-6xl px-6 py-24">
           <div className="text-center">
             <p className="text-eyebrow text-primary">Two poles</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-balance">
+            <h2 className="font-display mt-3 text-4xl tracking-tight text-balance">
               One is chasing. One is cheering.
             </h2>
             <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-pretty">
@@ -236,13 +247,36 @@ export default function Home() {
           <div className="mt-12">
             <ModeShowcase />
           </div>
+
+          <div className="mt-24">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-eyebrow text-[var(--ally)]">
+                  Voice library · preview
+                </p>
+                <h3 className="font-display mt-3 text-3xl tracking-tight text-balance">
+                  Pick the voice you least want to disappoint.
+                </h3>
+              </div>
+              <Badge
+                variant="secondary"
+                className="bg-secondary/70 text-muted-foreground rounded-full px-3 py-1"
+              >
+                <Mic className="size-3.5" />
+                ElevenLabs integration coming
+              </Badge>
+            </div>
+            <div className="mt-8">
+              <VoiceSampler />
+            </div>
+          </div>
         </section>
 
         <section id="proof" className="border-y bg-card/30">
           <div className="mx-auto w-full max-w-5xl px-6 py-24">
             <div className="text-center">
               <p className="text-eyebrow text-primary">The north star</p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-balance">
+              <h2 className="font-display mt-3 text-4xl tracking-tight text-balance">
                 See exactly what moved your pace.
               </h2>
               <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-pretty">
@@ -256,8 +290,24 @@ export default function Home() {
           </div>
         </section>
 
+        <section id="pricing" className="mx-auto w-full max-w-6xl px-6 py-24">
+          <div className="text-center">
+            <p className="text-eyebrow text-primary">Placeholder pricing</p>
+            <h2 className="font-display mt-3 text-4xl tracking-tight text-balance">
+              Spread thin, or spread it on thick.
+            </h2>
+            <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-pretty">
+              Numbers below are stand-ins while we work out what a well-timed
+              taunt is worth. Nothing is charged, nothing is final.
+            </p>
+          </div>
+          <div className="mt-12">
+            <PricingTable />
+          </div>
+        </section>
+
         <section id="how" className="mx-auto w-full max-w-6xl px-6 py-24">
-          <h2 className="text-4xl font-semibold tracking-tight text-balance">
+          <h2 className="font-display text-4xl tracking-tight text-balance">
             Three steps, one run.
           </h2>
           <ol className="mt-12 grid gap-px overflow-hidden rounded-3xl border bg-border sm:grid-cols-3">
@@ -266,7 +316,7 @@ export default function Home() {
                 <span className="text-primary/40 font-mono text-4xl tabular-nums">
                   0{index + 1}
                 </span>
-                <h3 className="text-lg font-medium">{step.title}</h3>
+                <h3 className="font-display text-lg">{step.title}</h3>
                 <p className="text-muted-foreground text-sm text-pretty">
                   {step.description}
                 </p>
@@ -286,7 +336,9 @@ export default function Home() {
                   <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-xl">
                     <Icon className="size-5" />
                   </span>
-                  <CardTitle className="mt-4 text-base">{title}</CardTitle>
+                  <CardTitle className="font-display mt-4 text-lg">
+                    {title}
+                  </CardTitle>
                   <CardDescription className="sr-only">{title}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -309,7 +361,7 @@ export default function Home() {
           />
           <div className="relative mx-auto w-full max-w-xl px-6 py-24 text-center">
             <p className="text-eyebrow text-primary">Early access</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-balance">
+            <h2 className="font-display mt-3 text-4xl tracking-tight text-balance">
               Your next PB is the first one we log.
             </h2>
             <p className="text-muted-foreground mt-4 text-pretty">
@@ -325,11 +377,13 @@ export default function Home() {
 
       <footer className="border-t">
         <div className="text-muted-foreground mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8 text-sm sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-foreground flex items-center gap-2 font-medium">
-            <Activity className="text-primary size-4" strokeWidth={2.75} />
-            Peanut Butter
+          <span className="text-foreground flex items-center gap-2">
+            <JarMark className="size-6" />
+            <span className="font-display text-lg leading-none">
+              Peanut Butter
+            </span>
           </span>
-          <span>Be your personal best. Run responsibly, look up.</span>
+          <span>Spread the pace. Run responsibly, look up.</span>
         </div>
       </footer>
     </div>
