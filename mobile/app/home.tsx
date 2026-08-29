@@ -1,4 +1,4 @@
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { formatPace } from "@shared/tracking";
@@ -40,10 +40,6 @@ export default function Home() {
       </View>
 
       <Button label="Run" onPress={onRun} />
-
-      <Link href="/gps-test" style={styles.link}>
-        GPS check
-      </Link>
     </Screen>
   );
 }
@@ -68,11 +64,5 @@ const styles = StyleSheet.create({
     color: theme.muted,
     fontFamily: font.body,
     fontSize: 14,
-  },
-  link: {
-    color: theme.muted,
-    fontFamily: font.bodyMedium,
-    fontSize: 14,
-    textAlign: "center",
   },
 });
