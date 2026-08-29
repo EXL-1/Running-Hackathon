@@ -37,6 +37,40 @@ This means a username is a handle, not an account: anyone who types someone
 else's username becomes that player. That is deliberate until auth lands, so
 don't put anything private behind it.
 
+### Native clients
+
+React Native has no cookie jar, so the Expo app in `mobile/` sends the same
+signed `<playerId>.<signature>` token as an `Authorization: Bearer` header.
+`readPlayerId()` prefers the header and falls back to the cookie, so browser and
+native clients share every route. `POST /api/auth/session` claims a username and
+hands back the token; store it with `expo-secure-store`, not `AsyncStorage`.
+
+## First-run onboarding
+
+After claiming a username a player walks through three steps, all under
+`/onboarding`:
+
+1. `goal` — what they want (`increase_pace` or `target_pace`) plus the pace they
+   care about, stored as whole seconds per km on `players`.
+2. `prompts` — how chatty the coach is, `prompt_frequency` 1–5.
+3. `voice` — one or more audio clips of people they love or hate.
+
+Progress is derived from the player row by `nextOnboardingStep()`
+(`src/lib/onboarding/steps.ts`) rather than tracked separately, so a signup
+abandoned halfway resumes where it stopped and `/dashboard` bounces back into
+onboarding until `onboarding_completed_at` is set. The voice step can be skipped.
+
+### Voices and ElevenLabs
+
+`POST /api/voices` takes multipart form data — a route handler rather than a
+server action because clips run past the 1MB action body cap. The sample is
+stored in the private `voice-samples` bucket, the `player_voices` row is written
+first, and only then is ElevenLabs asked for an instant clone, so an ElevenLabs
+outage never loses an upload; `status` says what happened (`uploaded` when no
+`ELEVENLABS_API_KEY` is set, `ready` with a `elevenlabs_voice_id`, or `failed`
+with the reason). A successful clone becomes the player's active voice, and a
+partial unique index keeps at most one active voice per player.
+
 ## Security model
 
 - RLS is enabled on every table and **no policies exist**, so the publishable
@@ -47,6 +81,8 @@ don't put anything private behind it.
 - Route handlers and server actions resolve the player themselves and scope
   every query by `player_id`; ids are never taken from the request body.
 - Derived values (run points) are computed server-side.
+- The `voice-samples` bucket is private, so uploaded clips are only reachable
+  through the server.
 
 ## Adding accounts later
 
@@ -69,6 +105,11 @@ Callers (`/dashboard`, `/api/runs`, `/api/players/me`) need no changes.
 
 | Route | Method | Notes |
 | --- | --- | --- |
-| `/api/players/me` | GET | Current player, or 401 |
+| `/api/auth/session` | POST | `{ username }` → `{ token, player, nextStep }` for native clients |
+| `/api/players/me` | GET | Current player plus `nextStep`, or 401 |
+| `/api/players/me` | PATCH | Native onboarding patch: `goalKind` + `targetPaceSPerKm`, `promptFrequency`, `onboardingCompleted` |
 | `/api/runs` | GET | `{ runs, limit, runCount, totalPoints }` — newest first, `?limit=` 1–200 (default 20); the totals cover every run |
 | `/api/runs` | POST | `{ mode, distanceM, durationS, startedAt? }`, validated with zod |
+| `/api/voices` | GET | Current player's voices, newest first |
+| `/api/voices` | POST | Multipart `label`, `sentiment`, `sample`; uploads and clones |
+| `/api/voices/[id]/activate` | POST | Makes one of the player's existing voices active |

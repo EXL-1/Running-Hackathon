@@ -3,15 +3,11 @@
 import { redirect } from "next/navigation";
 import * as z from "zod";
 
+import { nextOnboardingStep } from "@/lib/onboarding/steps";
 import { claimUsernameSchema, type FormState } from "@/lib/player/schemas";
+import { claimPlayer } from "@/lib/player/service";
 import { clearPlayerSession, writePlayerSession } from "@/lib/player/session";
-import { createServiceClient } from "@/lib/supabase/server";
 
-/**
- * Claims a username, creating the player on first use and reusing the same row
- * afterwards. There is no secret involved yet, so a username is a handle rather
- * than an account: anyone who types it becomes that player.
- */
 export async function claimUsername(
   _state: FormState,
   formData: FormData,
@@ -24,22 +20,17 @@ export async function claimUsername(
     return { errors: z.flattenError(parsed.error).fieldErrors };
   }
 
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("players")
-    .upsert(
-      { username: parsed.data.username, last_seen_at: new Date().toISOString() },
-      { onConflict: "username" },
-    )
-    .select("id")
-    .single();
+  let player;
 
-  if (error || !data) {
+  try {
+    player = await claimPlayer(parsed.data.username);
+  } catch {
     return { message: "Could not save that username. Try again." };
   }
 
-  await writePlayerSession(data.id);
-  redirect("/dashboard");
+  await writePlayerSession(player.id);
+
+  redirect(nextOnboardingStep(player)?.href ?? "/dashboard");
 }
 
 export async function switchPlayer() {

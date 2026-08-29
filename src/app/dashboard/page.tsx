@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { LogRunForm } from "@/components/runs/log-run-form";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatPace } from "@/lib/onboarding/pace";
 import { switchPlayer } from "@/lib/player/actions";
-import { requirePlayer } from "@/lib/player/current";
+import { requireOnboardedPlayer } from "@/lib/player/current";
 import { getRunTotals, listRuns } from "@/lib/runs/service";
+import { listVoices } from "@/lib/voice/service";
+
+const goalLabels = {
+  increase_pace: "Getting faster",
+  target_pace: "Training for a pace",
+} as const;
 
 export const metadata: Metadata = {
   title: "Your runs — Runaway",
@@ -24,11 +32,13 @@ function formatDuration(seconds: number) {
 }
 
 export default async function DashboardPage() {
-  const player = await requirePlayer();
-  const [runs, { runCount, totalPoints }] = await Promise.all([
+  const player = await requireOnboardedPlayer();
+  const [runs, voices, { runCount, totalPoints }] = await Promise.all([
     listRuns(player.id),
+    listVoices(player.id),
     getRunTotals(player.id),
   ]);
+  const activeVoice = voices.find((voice) => voice.isActive);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
@@ -45,6 +55,38 @@ export default async function DashboardPage() {
           </Button>
         </form>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Your setup</CardTitle>
+          <CardDescription>
+            Change any of it by walking through{" "}
+            <Link href="/onboarding/goal" className="underline">
+              setup
+            </Link>{" "}
+            again.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 text-sm sm:grid-cols-3">
+          <div>
+            <p className="text-muted-foreground text-xs">Goal</p>
+            <p>
+              {player.goalKind ? goalLabels[player.goalKind] : "—"}
+              {player.targetPaceSPerKm
+                ? ` · ${formatPace(player.targetPaceSPerKm)}/km`
+                : ""}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs">Prompts</p>
+            <p>{player.promptFrequency ?? "—"} of 5</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs">Voice</p>
+            <p>{activeVoice ? activeVoice.label : "None yet"}</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
