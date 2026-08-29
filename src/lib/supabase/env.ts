@@ -19,3 +19,11 @@ export function supabaseSecretKey() {
 export function sessionSecret() {
   return required("SESSION_SECRET", process.env.SESSION_SECRET);
 }
+
+/**
+ * Optional: without it samples are still stored, they just stay unclonable and
+ * the voice sits in `uploaded` until a key is configured.
+ */
+export function elevenLabsApiKey() {
+  return process.env.ELEVENLABS_API_KEY ?? null;
+}
