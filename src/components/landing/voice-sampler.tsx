@@ -19,8 +19,8 @@ type Voice = {
 
 const voices: Voice[] = [
   {
-    id: "ex",
-    name: "The Ex",
+    id: "ex-female",
+    name: "The Ex (female)",
     tag: "Most played",
     pole: "rival",
     brief: "Has seen your Strava. Has opinions.",
@@ -29,6 +29,19 @@ const voices: Voice[] = [
       "Oh, you run now? Since when?",
       "I'm forty metres back and I'm not even out of breath.",
       "Your new personality is a running app. Cute.",
+    ],
+  },
+  {
+    id: "ex-male",
+    name: "The Ex (male)",
+    tag: "Equally devastating",
+    pole: "rival",
+    brief: "Still tells people about that 10K. In 2021.",
+    duration: "0:07",
+    lines: [
+      "Mate. Mate. Is this the pace?",
+      "I'm not even trying and I'm right here.",
+      "You'll tell everyone about this run, won't you.",
     ],
   },
   {
