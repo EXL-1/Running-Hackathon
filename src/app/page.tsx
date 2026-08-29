@@ -94,7 +94,7 @@ export default function Home() {
             <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-xl">
               <Activity className="size-4.5" strokeWidth={2.75} />
             </span>
-            Peanutbuttol
+            Peanut Butter
           </span>
           <nav className="text-muted-foreground hidden items-center gap-8 text-sm md:flex">
             <a href="#voices" className="hover:text-foreground transition-colors">
@@ -138,7 +138,7 @@ export default function Home() {
                 <span className="text-primary">personal best.</span>
               </h1>
               <p className="text-muted-foreground mt-6 max-w-xl text-lg leading-relaxed text-pretty">
-                Peanutbuttol puts two voices on your run. Drift under your aim
+                Peanut Butter puts two voices on your run. Drift under your aim
                 pace and your arch-enemy gains ground. Hold it, and someone who
                 loves you carries you to the PB.
               </p>
@@ -327,7 +327,7 @@ export default function Home() {
         <div className="text-muted-foreground mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-8 text-sm sm:flex-row sm:items-center sm:justify-between">
           <span className="text-foreground flex items-center gap-2 font-medium">
             <Activity className="text-primary size-4" strokeWidth={2.75} />
-            Peanutbuttol
+            Peanut Butter
           </span>
           <span>Be your personal best. Run responsibly, look up.</span>
         </div>

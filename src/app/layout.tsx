@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Peanutbuttol — be your personal best",
+  title: "Peanut Butter — be your personal best",
   description:
     "A voice-led pace coach: your arch-enemy taunts you when you drift off pace, someone who loves you carries you when your PB is in sight.",
 };
