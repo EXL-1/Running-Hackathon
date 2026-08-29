@@ -37,6 +37,14 @@ This means a username is a handle, not an account: anyone who types someone
 else's username becomes that player. That is deliberate until auth lands, so
 don't put anything private behind it.
 
+### Native clients
+
+React Native has no cookie jar, so the Expo app in `mobile/` sends the same
+signed `<playerId>.<signature>` token as an `Authorization: Bearer` header.
+`readPlayerId()` prefers the header and falls back to the cookie, so browser and
+native clients share every route. `POST /api/auth/session` claims a username and
+hands back the token; store it with `expo-secure-store`, not `AsyncStorage`.
+
 ## First-run onboarding
 
 After claiming a username a player walks through three steps, all under
@@ -97,8 +105,11 @@ Callers (`/dashboard`, `/api/runs`, `/api/players/me`) need no changes.
 
 | Route | Method | Notes |
 | --- | --- | --- |
-| `/api/players/me` | GET | Current player, or 401 |
+| `/api/auth/session` | POST | `{ username }` → `{ token, player, nextStep }` for native clients |
+| `/api/players/me` | GET | Current player plus `nextStep`, or 401 |
+| `/api/players/me` | PATCH | Native onboarding patch: `goalKind` + `targetPaceSPerKm`, `promptFrequency`, `onboardingCompleted` |
 | `/api/runs` | GET | `{ runs, limit, runCount, totalPoints }` — newest first, `?limit=` 1–200 (default 20); the totals cover every run |
 | `/api/runs` | POST | `{ mode, distanceM, durationS, startedAt? }`, validated with zod |
 | `/api/voices` | GET | Current player's voices, newest first |
 | `/api/voices` | POST | Multipart `label`, `sentiment`, `sample`; uploads and clones |
+| `/api/voices/[id]/activate` | POST | Makes one of the player's existing voices active |

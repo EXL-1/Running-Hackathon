@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { sessionSecret } from "@/lib/supabase/env";
 
@@ -21,28 +21,46 @@ function verify(playerId: string, signature: string) {
   );
 }
 
-/** Returns the player id from the signed cookie, or `null` if absent/tampered. */
-export async function readPlayerId() {
-  const cookie = (await cookies()).get(COOKIE_NAME)?.value;
+/** `<playerId>.<hmac>`, used both as the cookie value and as the bearer token. */
+export function createPlayerToken(playerId: string) {
+  return `${playerId}.${sign(playerId)}`;
+}
 
-  if (!cookie) {
-    return null;
-  }
-
-  const separator = cookie.lastIndexOf(".");
+function playerIdFromToken(token: string) {
+  const separator = token.lastIndexOf(".");
 
   if (separator < 1) {
     return null;
   }
 
-  const playerId = cookie.slice(0, separator);
-  const signature = cookie.slice(separator + 1);
+  const playerId = token.slice(0, separator);
+  const signature = token.slice(separator + 1);
 
   return verify(playerId, signature) ? playerId : null;
 }
 
+/**
+ * The player id proven by this request, or `null` if absent/tampered.
+ *
+ * Browsers send the signed cookie; the native app has no cookie jar and sends
+ * the same token as `Authorization: Bearer`. The bearer header wins so a phone
+ * is never mistaken for whoever last used the browser.
+ */
+export async function readPlayerId() {
+  const authorization = (await headers()).get("authorization");
+  const bearer = authorization?.match(/^Bearer (.+)$/i)?.[1];
+
+  if (bearer) {
+    return playerIdFromToken(bearer.trim());
+  }
+
+  const cookie = (await cookies()).get(COOKIE_NAME)?.value;
+
+  return cookie ? playerIdFromToken(cookie) : null;
+}
+
 export async function writePlayerSession(playerId: string) {
-  (await cookies()).set(COOKIE_NAME, `${playerId}.${sign(playerId)}`, {
+  (await cookies()).set(COOKIE_NAME, createPlayerToken(playerId), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

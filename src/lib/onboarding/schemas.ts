@@ -51,6 +51,17 @@ export const paceSchema = z
     },
   );
 
+/** Pace sent by the native app, which picks whole seconds on a wheel. */
+export const paceSecondsSchema = z.coerce
+  .number()
+  .int()
+  .min(MIN_PACE_S_PER_KM, {
+    error: `Pick a pace between ${formatPace(MIN_PACE_S_PER_KM)} and ${formatPace(MAX_PACE_S_PER_KM)} per km.`,
+  })
+  .max(MAX_PACE_S_PER_KM, {
+    error: `Pick a pace between ${formatPace(MIN_PACE_S_PER_KM)} and ${formatPace(MAX_PACE_S_PER_KM)} per km.`,
+  });
+
 export const goalSchema = z.object({
   goalKind: z.enum(goalKinds, { error: "Pick what you are training for." }),
   targetPaceSPerKm: paceSchema,
@@ -80,6 +91,28 @@ export const voiceUploadSchema = z.object({
       error: "Keep the clip under 10 MB.",
     }),
 });
+
+/**
+ * A partial onboarding update, as the native app sends it. Goal and pace move
+ * together because a goal without a pace to compare against says nothing.
+ */
+export const playerOnboardingPatchSchema = z
+  .object({
+    goalKind: z.enum(goalKinds).optional(),
+    targetPaceSPerKm: paceSecondsSchema.optional(),
+    promptFrequency: promptFrequencySchema.shape.promptFrequency.optional(),
+    onboardingCompleted: z.literal(true).optional(),
+  })
+  .refine(
+    (patch) =>
+      (patch.goalKind === undefined) === (patch.targetPaceSPerKm === undefined),
+    { error: "Send goalKind and targetPaceSPerKm together." },
+  )
+  .refine((patch) => Object.values(patch).some((value) => value !== undefined), {
+    error: "Nothing to update.",
+  });
+
+export type PlayerOnboardingPatch = z.infer<typeof playerOnboardingPatchSchema>;
 
 export type GoalInput = z.infer<typeof goalSchema>;
 export type VoiceUploadInput = z.infer<typeof voiceUploadSchema>;

@@ -19,6 +19,9 @@ Open http://localhost:3000 for the landing page, or http://localhost:3000/start
 for the app itself. See [docs/backend.md](docs/backend.md) for the Supabase
 setup, the schema and how accounts get added later.
 
+The run experience is native: see [mobile/README.md](mobile/README.md) for the
+Expo app and [TESTING.md](TESTING.md) for the team test script.
+
 ## Scripts
 
 - `npm run dev` – dev server
@@ -34,6 +37,8 @@ setup, the schema and how accounts get added later.
 - `src/components/ui` – shadcn/ui primitives
 - `src/lib/player`, `src/lib/runs`, `src/lib/supabase` – server-side player identity, runs and Supabase access
 - `src/lib/utils.ts` – shared helpers (`cn`)
+- `shared/` – pace, distance and GPS filtering maths used by both clients
+- `mobile/` – Expo (React Native) app
 
 ## Stack
 
