@@ -50,7 +50,7 @@ const tiers: Tier[] = [
     cta: "Go too far",
     features: [
       "Voice cloning via ElevenLabs, once that lands",
-      "Overexcited Commentator narrates your Tuesday 5K",
+      "Both Exes, so you can be haunted in stereo",
       "Custom taunt scripts and landmark call-outs",
       "Four seats, for a family that races each other",
     ],

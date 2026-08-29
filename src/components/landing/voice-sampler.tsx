@@ -19,16 +19,29 @@ type Voice = {
 
 const voices: Voice[] = [
   {
-    id: "ex",
-    name: "The Ex",
+    id: "ex-female",
+    name: "The Ex (female)",
     tag: "Most played",
     pole: "rival",
-    brief: "Has seen your Strava. Has opinions.",
+    brief: "Approval, but only on her terms.",
     duration: "0:07",
     lines: [
-      "Oh, you run now? Since when?",
-      "I'm forty metres back and I'm not even out of breath.",
-      "Your new personality is a running app. Cute.",
+      "You've never been fit enough for me. But keep going, it's sweet.",
+      "I'd say I'm proud of you, but you'd only slow down.",
+      "See, you can do it. You just needed me to be disappointed first.",
+    ],
+  },
+  {
+    id: "ex-male",
+    name: "The Ex (male)",
+    tag: "Gaslighting, but cardio",
+    pole: "rival",
+    brief: "Certain you said a slower target. You didn't.",
+    duration: "0:07",
+    lines: [
+      "You said five minutes a kilometre. No — you said five thirty. I remember.",
+      "Calm down. I'm being supportive. This is supportive.",
+      "That wasn't your PB. You're thinking of a different run.",
     ],
   },
   {
@@ -70,32 +83,6 @@ const voices: Voice[] = [
       "There's a scone at the end of this. Earn the scone.",
     ],
   },
-  {
-    id: "past-you",
-    name: "You, In 2019",
-    tag: "Devastating",
-    pole: "rival",
-    brief: "Fitter, smugger, and still bringing it up.",
-    duration: "0:06",
-    lines: [
-      "I did this pace in jeans, mate.",
-      "Remember when we had knees? Good times.",
-      "Beat my split or stop using my name.",
-    ],
-  },
-  {
-    id: "commentator",
-    name: "Overexcited Commentator",
-    tag: "New",
-    pole: "ally",
-    brief: "Narrating your 5K like it is an Olympic final.",
-    duration: "0:10",
-    lines: [
-      "AND THEY'RE OFF, past the bins, past the bins!",
-      "This is a Tuesday and yet it feels like history.",
-      "Ladies and gentlemen, the corner shop has never seen speed like it.",
-    ],
-  },
 ];
 
 const PREVIEW_MS = 2600;
@@ -110,11 +97,14 @@ export function VoiceSampler() {
 
   const active = voices.find((voice) => voice.id === activeId) ?? voices[0];
 
-  useEffect(() => () => {
-    if (timer.current) {
-      clearInterval(timer.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) {
+        clearInterval(timer.current);
+      }
+    },
+    [],
+  );
 
   function stop() {
     if (timer.current) {
@@ -159,7 +149,8 @@ export function VoiceSampler() {
       <ul className="divide-border bg-card/60 divide-y overflow-hidden rounded-3xl border">
         {voices.map((voice) => {
           const isPlaying = playingId === voice.id;
-          const accent = voice.pole === "rival" ? "var(--rival)" : "var(--ally)";
+          const accent =
+            voice.pole === "rival" ? "var(--rival)" : "var(--ally)";
 
           return (
             <li key={voice.id}>
@@ -216,8 +207,7 @@ export function VoiceSampler() {
           <span
             className="text-xs font-medium"
             style={{
-              color:
-                active.pole === "rival" ? "var(--rival)" : "var(--ally)",
+              color: active.pole === "rival" ? "var(--rival)" : "var(--ally)",
             }}
           >
             {active.pole === "rival" ? "Chasing you" : "Cheering you"}
