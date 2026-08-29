@@ -8,8 +8,10 @@ Product + technical plan. Written 2026-08-29.
 
 A running app with a **voice coach that isn't generic**. You pick a mode before the run:
 
-- **Ex Mode** — a panicked, adrenal, "GO GO GO, they're gaining on you" narrative. The conceit is that your ex is behind you. Voice lines are taunting, funny, slightly unhinged, and escalate with your pace. Chase mechanics: a virtual pursuer whose distance is a function of your actual pace vs. a target pace.
+- **Ex Mode** — the *negative* mode, and deliberately so. The conceit is that your ex is behind you and you do not want to be caught. Where Mum Mode pulls you forward with warmth, Ex Mode pushes you forward with dread: the lines are smug, needling, and unwelcome, the pursuer gets audibly closer when you slow, and slowing down is *punished* with more of the voice rather than less. Aversive motivation is the whole point — the reward for running hard is the ex fading into silence behind you.
 - **Mum Mode** — warm, proud, unconditional encouragement in a mum's voice. Lower intensity, slower cadence, never shouts, tells you it's fine to walk, remembers your last run ("you did 5k on Tuesday, love").
+
+The two modes are opposite in sign, not in volume: Mum Mode is reward-shaped (praise for effort, silence is neutral), Ex Mode is punishment-shaped (the voice is the punishment, silence is the reward). §7a spells out how far the negativity goes and where the floor is.
 
 Both are the *same engine* with a different persona pack: voice + line bank + trigger rules + intensity curve. That framing is the single most important architectural decision — everything below assumes personas are data, not code.
 
@@ -24,8 +26,8 @@ Ranked by risk, not by build order.
 | 1 | **Sourcing the voices, legally** | "Your ex's voice" and "your mum's voice" are, by default, *cloning a real third party*. ElevenLabs requires consent + voice-captcha verification for cloning, and several jurisdictions are actively legislating (Tennessee ELVIS Act; the NO FAKES Act in the US Senate; EU/France personality rights; UK is a patchwork and weaker). A consumer feature where users upload "my ex's voice" is a lawsuit and an App Store rejection waiting to happen. | Ship **archetype voices** (cast actors / Voice Design) at launch. Real-person cloning only via a **double-opt-in consent flow** where the voice owner records the consent themselves. See §6. |
 | 2 | **Audio while the phone is in a pocket, screen off** | Mobile web can't do this. On iOS a standalone PWA historically stops audio when backgrounded, `AudioContext` suspends when the page is hidden, and `watchPosition` stops firing when backgrounded. There is no background geolocation on the web. | Native shell (Capacitor or React Native/Expo) with background-audio + background-location entitlements. See §4. |
 | 3 | **Latency & cost of live TTS mid-run** | Real-time synth over flaky cellular while running is the worst possible network environment. Flash v2.5 is ~75 ms *model inference*, but that excludes network round trip. | **Pre-generate and cache** ~95% of lines on-device; live-synth only the rare personalised line. See §5. |
-| 4 | **Not being annoying by run #3** | A hype voice that repeats is instantly grating. This kills the app more reliably than any bug. | Line bank of 300–600 variants per persona, weighted no-repeat sampling, intensity curve, mandatory silence windows. See §7. |
-| 5 | **Ex Mode punching down** | "Running from your ex" can land as funny or as trauma. Some users are running from an actual abuser. | Persona is a cartoon, never cruel; no body/appearance/worth insults; onboarding tone-check; instant switch to Mum Mode; hard content rules in §8. |
+| 4 | **Not being annoying by run #3** | A hype voice that repeats is instantly grating. This kills the app more reliably than any bug. Ex Mode is a special case: it's *meant* to be unpleasant, so the failure mode is the user muting it rather than outrunning it. | Line bank of 300–600 variants per persona, weighted no-repeat sampling, intensity curve, mandatory silence windows; for Ex Mode, tune on pace response rather than on how clever the line is. See §7 and §7a. |
+| 5 | **Ex Mode has to be nasty enough to work, without punching down** | The mode fails if it's just cheerful hype in a sarcastic accent — you need real aversion for the user to want to escape. But "running from your ex" can also land as trauma; some users are running from an actual abuser. The line is *targeted vs. untargeted* negativity: the persona can be insufferable about itself and about the situation, never about the user's body or worth. | Negativity dial with a hard floor (§7a); no body/appearance/worth insults; onboarding tone-check; one-tap escape to Mum Mode; content rules in §8. |
 
 ---
 
@@ -130,22 +132,51 @@ Voices are 40% of it; scripts are 60%. Budget for a comedy writer for a day. Str
 
 Inputs each tick (1 Hz): GPS position, instantaneous + rolling pace, cadence (accelerometer), elapsed time, distance, HR if a Bluetooth strap is paired.
 
-**Ex Mode — the Pursuer.** Maintain a virtual chaser at distance `d`. `d` grows when your pace beats target, shrinks when it drops. Map `d` to intensity 1–5 and to a spatial audio cue (footsteps panned behind you, closer = louder — this alone is worth more than 100 voice lines). Getting caught = a comedy line + a 60 s "escape" interval challenge, never a fail state.
+**Ex Mode — the Pursuer.** Maintain a virtual chaser at distance `d`. `d` grows when your pace beats target, shrinks when it drops. Map `d` to negativity 1–5 (§7a) and to a spatial audio cue (footsteps panned behind you, closer = louder — this alone is worth more than 100 voice lines). Getting caught is not a fail state, but it is *unpleasant*: the ex draws level, the taunting goes from third-person to intimate close-mic, and it only stops when you win the 60 s "escape" interval.
 
 **Mum Mode — the Companion.** No jeopardy. Triggers on effort, not performance: sustained climbs, first km, halfway, "you've slowed down, that's alright". Explicitly praises walking. Intensity never exceeds 3.
 
 **Trigger types (shared):** run start, first 500 m, each km, pace up/down inflection, hill detected (elevation delta), halfway, negative split achieved, personal best, final 500 m, finish, plus randomised flavour lines on a Poisson timer.
 
-**Anti-annoyance:** weighted sampling with a 20-line recency window, per-line global cooldown, a "quiet mode" slider (Chatty / Normal / Only when it matters), and log a `line_skipped` event whenever the user hits mute right after a line — that's your dataset for pruning bad lines.
+**Anti-annoyance (Mum Mode):** weighted sampling with a 20-line recency window, per-line global cooldown, a "quiet mode" slider (Chatty / Normal / Only when it matters), and log a `line_skipped` event whenever the user hits mute right after a line — that's your dataset for pruning bad lines. Ex Mode inverts the first two rules on purpose (§7a): there, density *is* the pressure, so cooldowns loosen as you slow.
+
+---
+
+## 7a. How negative Ex Mode actually gets
+
+The design mistake to avoid is a "chase" mode that's really an encouragement mode with attitude. If the user is meant to run *away* from something, the something has to be genuinely unwelcome. Concretely:
+
+**Negativity levels (replaces the neutral "intensity" curve for this persona).** Each line is tagged 1–5 and the pursuer's distance selects the band:
+
+| Level | Pursuer | Register | Example flavour |
+|---|---|---|---|
+| 1 | far / fading | mock-friendly, patronising | "Oh, we're jogging now. Cute." |
+| 2 | holding | needling, keeps score | "You said you'd do this in 25. It's 25." |
+| 3 | closing | smug, present tense, no jokes for you | "I'm not even trying. That's the sad part." |
+| 4 | on your shoulder | close-mic, breath in the mic, invasive | "[whispers] I can hear you. That's not breathing, that's begging." |
+| 5 | level with you | relentless, monologuing about getting back together | "[laughs] Slow down, I've got so much to tell you." |
+
+**Inverted reinforcement.** Running well earns *silence and distance* — the footsteps recede, the voice drops to level 1, and after a sustained good stretch the ex gives up mid-sentence (the single most satisfying beat in the mode). Slowing down earns *more voice, closer*: cooldown shrinks from 25 s toward ~12 s as `d` collapses, so the punishment is density as well as content.
+
+**Sound design carries most of the negativity.** Footsteps and breathing panned behind you, a low unresolved drone that rises with the level, no music sting on milestones (milestones aren't celebrated in this mode — they're *survived*). At level 4–5 mix the voice dry and uncomfortably near-field; at level 1 push it back into reverb.
+
+**Content aimed at the persona, not the user.** The ex is the villain and is allowed to be insufferable, self-obsessed, revisionist about the breakup, and unbothered by your suffering. What it must never do is attack the runner's body, weight, appearance, worth, or relationships — that's the difference between "I want to get away from this voice" and "this app made me feel worthless". A useful test per line: *would this still be funny read aloud to a friend?* If it's only cruel, cut it.
+
+**Hard floor, non-negotiable (see §8).** No body/appearance/worth content, no sexual content, no threats of real-world harm, no self-harm framing, no "you'll die alone", no encouragement to run through pain or traffic, level 5 caps at 90 s before it decays, and one tap swaps to Mum Mode mid-sentence.
+
+**Give the user the dial.** Onboarding sets Ex Mode's ceiling — *Petty / Brutal / Unhinged* — defaulting to Petty, with Unhinged unlocked only after the tone-check screen. This is also the cheap A/B: if retention is better at Brutal than Petty, the negativity is doing the work we think it is.
+
+**Instrument it.** Log level at every line, mute-after-line, mode switches out of Ex Mode, and pace delta in the 60 s after each line by level. The success signal for a negative line is behavioural — pace goes *up* — not that it was clever. Prune any line whose average pace response is flat and whose mute rate is high.
 
 ---
 
 ## 8. Safety, tone, and legal checklist
 
 - Consent records for every cloned voice, with revocation that propagates to ElevenLabs and to cached audio.
-- Content rules for Ex Mode: no comments on body/weight/appearance, no sexual content, no "you'll die alone" cruelty, no naming real third parties in generated text unless the user typed the name themselves. Ex Mode is *slapstick jeopardy*, not abuse.
-- Onboarding line: "This is a joke persona. Switch to Mum Mode any time." One-tap persona switch mid-run.
-- Safety over comedy: never encourage running through traffic, never tell someone to keep going through pain, and cap intensity escalation.
+- Content rules for Ex Mode (the floor under §7a's negativity dial): no comments on body/weight/appearance, no sexual content, no threats of real-world harm, no self-harm framing, no "you'll die alone" cruelty, no naming real third parties in generated text unless the user typed the name themselves. The persona is a villain to be escaped, not a critic of the runner.
+- Onboarding line: "This persona is deliberately unpleasant, and it's a joke. Switch to Mum Mode any time." One-tap persona switch mid-run, honoured mid-sentence.
+- Tone-check screen before the first Ex Mode run, and never auto-suggest Ex Mode to a user who has switched out of it.
+- Safety over comedy: never encourage running through traffic, never tell someone to keep going through pain, and cap negativity escalation (level 5 decays after 90 s; a caught runner is always given a way out).
 - GDPR: voice recordings and location traces are personal data; location is arguably sensitive. Data minimisation, explicit purpose, export + delete, EU data residency if you have EU users.
 - Watermarking/traceability: ElevenLabs can trace generated audio back to the generating account — useful in a dispute, and worth stating publicly in a trust page.
 - App Store: expect review questions on the voice-cloning flow. Have the consent UX screenshotted and ready.
@@ -155,7 +186,7 @@ Inputs each tick (1 Hz): GPS position, instantaneous + rolling pace, cadence (ac
 ## 9. Build plan
 
 **Phase 0 — Proof of the feeling (2–3 days).**
-Web-only. Fake the GPS with a simulated pace slider. Voice Design one ex voice + one mum voice. Write 40 lines. Run it on a treadmill with headphones. *Decision gate: is it funny/moving on run #2?* If no, no amount of engineering saves it.
+Web-only. Fake the GPS with a simulated pace slider. Voice Design one ex voice + one mum voice. Write 40 lines — for Ex Mode, write them across all five negativity levels, because the top of the range is what you're actually testing. Run it on a treadmill with headphones. *Decision gate: on run #2, does Mum Mode still move you, and does Ex Mode at level 4 actually make you speed up rather than reach for mute?* If no, no amount of engineering saves it.
 
 **Phase 1 — Real run, phone in hand (1–2 weeks).**
 Real geolocation + Kalman-smoothed pace, the trigger engine, pre-rendered line bank of ~150 lines per persona, music ducking, run summary screen. PWA, wake lock, screen on.
@@ -164,7 +195,7 @@ Real geolocation + Kalman-smoothed pace, the trigger engine, pre-rendered line b
 Capacitor, background location + background audio, offline pack download, run history and sync, Apple Health / Google Fit / Strava export (Strava export is the growth channel — the post-run share card is the ad).
 
 **Phase 3 — The Pursuer + the mum clone (2–3 weeks).**
-Spatial footsteps, chase dynamics, the consented "invite your mum" cloning flow, per-run personalised line generation.
+Spatial footsteps, the drone bed, close-mic level 4–5 variants, the negativity dial and tone-check, chase dynamics, the consented "invite your mum" cloning flow, per-run personalised line generation.
 
 **Phase 4 — Depth.**
 More personas (a licensed celebrity ex is an obvious partnership), friend taunt packs, weekly narrative arcs, leaderboards, subscription.
@@ -178,5 +209,6 @@ Realistically: a compelling demo in a few days; a shippable v1 in about six focu
 1. **Web app or app-store app?** The plan above says "web codebase, native shell". If it must stay pure web, we lose screen-off running and the product changes shape (treadmill/foreground-only).
 2. **Cast real actors, or ship Voice Design voices?** Cost vs. comic timing.
 3. **How far do we go on "your actual mum"?** It's the most emotionally powerful feature and the biggest compliance surface.
-4. **Monetisation** — free app with paid persona packs is the obvious fit and it maps cleanly onto the per-persona TTS cost model.
-5. **Do we need our own run tracking at all**, or do we ride on top of Strava/Apple Health as an "audio layer"? Building a *worse Strava* is the classic trap here.
+4. **How nasty is the default Ex Mode?** The plan defaults to Petty with Unhinged behind a tone-check. If the negativity is the headline of the product, the default moves to Brutal and the onboarding has to work harder.
+5. **Monetisation** — free app with paid persona packs is the obvious fit and it maps cleanly onto the per-persona TTS cost model.
+6. **Do we need our own run tracking at all**, or do we ride on top of Strava/Apple Health as an "audio layer"? Building a *worse Strava* is the classic trap here.
