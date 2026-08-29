@@ -13,7 +13,7 @@ import {
 import { formatPace } from "@/lib/onboarding/pace";
 import { switchPlayer } from "@/lib/player/actions";
 import { requireOnboardedPlayer } from "@/lib/player/current";
-import { listRuns } from "@/lib/runs/service";
+import { getRunTotals, listRuns } from "@/lib/runs/service";
 import { listVoices } from "@/lib/voice/service";
 
 const goalLabels = {
@@ -33,11 +33,11 @@ function formatDuration(seconds: number) {
 
 export default async function DashboardPage() {
   const player = await requireOnboardedPlayer();
-  const [runs, voices] = await Promise.all([
+  const [runs, voices, { runCount, totalPoints }] = await Promise.all([
     listRuns(player.id),
     listVoices(player.id),
+    getRunTotals(player.id),
   ]);
-  const totalPoints = runs.reduce((total, run) => total + run.points, 0);
   const activeVoice = voices.find((voice) => voice.isActive);
 
   return (
@@ -46,8 +46,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold">{player.username}</h1>
           <p className="text-muted-foreground text-sm">
-            {runs.length} run{runs.length === 1 ? "" : "s"} · {totalPoints}{" "}
-            points
+            {runCount} run{runCount === 1 ? "" : "s"} · {totalPoints} points
           </p>
         </div>
         <form action={switchPlayer}>

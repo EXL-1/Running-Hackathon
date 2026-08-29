@@ -41,7 +41,11 @@ export const getCurrentPlayer = cache(async (): Promise<Player | null> => {
     .eq("id", playerId)
     .maybeSingle();
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
     return null;
   }
 

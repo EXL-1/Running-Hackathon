@@ -3,16 +3,45 @@ import * as z from "zod";
 
 import { getCurrentPlayer } from "@/lib/player/current";
 import { createRunSchema } from "@/lib/player/schemas";
-import { createRun, listRuns } from "@/lib/runs/service";
+import {
+  createRun,
+  DEFAULT_RUN_LIMIT,
+  getRunTotals,
+  listRuns,
+  MAX_RUN_LIMIT,
+} from "@/lib/runs/service";
 
-export async function GET() {
+const limitSchema = z.coerce
+  .number()
+  .int()
+  .positive()
+  .max(MAX_RUN_LIMIT)
+  .default(DEFAULT_RUN_LIMIT);
+
+export async function GET(request: NextRequest) {
   const player = await getCurrentPlayer();
 
   if (!player) {
     return Response.json({ error: "No player selected." }, { status: 401 });
   }
 
-  return Response.json({ runs: await listRuns(player.id) });
+  const limit = limitSchema.safeParse(
+    request.nextUrl.searchParams.get("limit") ?? undefined,
+  );
+
+  if (!limit.success) {
+    return Response.json(
+      { error: `limit must be an integer between 1 and ${MAX_RUN_LIMIT}.` },
+      { status: 422 },
+    );
+  }
+
+  const [runs, { runCount, totalPoints }] = await Promise.all([
+    listRuns(player.id, limit.data),
+    getRunTotals(player.id),
+  ]);
+
+  return Response.json({ runs, limit: limit.data, runCount, totalPoints });
 }
 
 export async function POST(request: NextRequest) {

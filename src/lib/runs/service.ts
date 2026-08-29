@@ -40,7 +40,10 @@ export function pointsForRun(input: Pick<CreateRunInput, "distanceM">) {
   return Math.round(input.distanceM / 100);
 }
 
-export async function listRuns(playerId: string, limit = 20) {
+export const DEFAULT_RUN_LIMIT = 20;
+export const MAX_RUN_LIMIT = 200;
+
+export async function listRuns(playerId: string, limit = DEFAULT_RUN_LIMIT) {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("runs")
@@ -54,6 +57,24 @@ export async function listRuns(playerId: string, limit = 20) {
   }
 
   return data.map(toRun);
+}
+
+/** Lifetime totals, so they stay correct beyond the runs listed on a page. */
+export async function getRunTotals(playerId: string) {
+  const supabase = createServiceClient();
+  const { data, error, count } = await supabase
+    .from("runs")
+    .select("points", { count: "exact" })
+    .eq("player_id", playerId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return {
+    runCount: count ?? data.length,
+    totalPoints: data.reduce((total, row) => total + row.points, 0),
+  };
 }
 
 export async function createRun(playerId: string, input: CreateRunInput) {

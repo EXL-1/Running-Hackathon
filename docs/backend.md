@@ -98,7 +98,7 @@ Callers (`/dashboard`, `/api/runs`, `/api/players/me`) need no changes.
 | Route | Method | Notes |
 | --- | --- | --- |
 | `/api/players/me` | GET | Current player, or 401 |
-| `/api/runs` | GET | Current player's runs, newest first |
+| `/api/runs` | GET | `{ runs, limit, runCount, totalPoints }` — newest first, `?limit=` 1–200 (default 20); the totals cover every run |
 | `/api/runs` | POST | `{ mode, distanceM, durationS, startedAt? }`, validated with zod |
 | `/api/voices` | GET | Current player's voices, newest first |
 | `/api/voices` | POST | Multipart `label`, `sentiment`, `sample`; uploads and clones |
