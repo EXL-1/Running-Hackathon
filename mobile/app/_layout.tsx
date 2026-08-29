@@ -63,10 +63,6 @@ export default function RootLayout() {
         <Stack.Screen name="baseline" />
         <Stack.Screen name="run" options={{ gestureEnabled: false }} />
         <Stack.Screen name="summary" />
-        <Stack.Screen
-          name="gps-test"
-          options={{ headerShown: true, title: "GPS test" }}
-        />
       </Stack>
     </>
   );

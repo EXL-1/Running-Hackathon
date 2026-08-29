@@ -13,12 +13,12 @@ The repo holds two clients on one backend:
 
 ---
 
-## 1. Test the native GPS screen on your phone (no laptop needed)
+## 1. Test native GPS tracking on your phone (no laptop needed)
 
 This is the priority test right now: does pace and distance look correct on a
-real phone? The Expo app has one screen for this, `/gps-test`, and it writes
-**nothing** to the database — the session lives in memory and disappears when
-you close the app.
+real phone? Use the run flow — Home → `Run` → baseline → the active run screen.
+The app writes **nothing** to the database — the session lives in memory and
+disappears when you close the app.
 
 ### Setup (2 minutes)
 
@@ -38,7 +38,7 @@ you close the app.
    server — it works over mobile data, outdoors, mid-run.
 3. They send you the `exp://….exp.direct` link (or a QR code). Open the link on
    your phone, or scan the QR with the Camera app (iOS) / Expo Go (Android).
-4. The app loads in Expo Go. Tap **Open GPS test**.
+4. The app loads in Expo Go on the Home screen.
 
 The dev server has to stay running while you test. Code changes reload on your
 phone within a couple of seconds, so bugs can be fixed while you stand there.
@@ -47,32 +47,31 @@ phone within a couple of seconds, so bugs can be fixed while you stand there.
 
 1. Go outside, or next to a window with a clear view of the sky. GPS is bad
    indoors.
-2. Tap **Start** and allow the location permission when iOS/Android asks.
-3. Wait until `Signal:` says `Strong` or `Usable` and the fix count is climbing.
-4. Keep the screen on and the app in the foreground, then move for at least
+2. Tap **Run**, walk through the location primer and coach pick, then choose a
+   baseline answer. Allow the location permission when iOS/Android asks.
+3. Keep the screen on and the app in the foreground, then move for at least
    3–5 minutes. Walking is fine.
-5. Tap **Stop**.
+4. Tap **Finish**.
 
 ### What should happen
 
 - [ ] Permission prompt appears the first time, and only the first time.
-- [ ] `Time` starts counting up the moment you press Start.
-- [ ] `Distance` stays at `0.00` while you stand still (GPS jitter is filtered
+- [ ] `Time` starts counting up as soon as the run screen opens.
+- [ ] `Km` stays at `0.00` while you stand still (GPS jitter is filtered
       out — small wobbles must not add distance).
-- [ ] `Distance` climbs steadily once you move, and roughly matches reality.
+- [ ] `Km` climbs steadily once you move, and roughly matches reality.
       Sanity checks: a standard running track lap is 0.40 km; compare against
       Strava/Apple Fitness/Google Maps for the same route if you have it.
       Anything within ~5% is fine.
-- [ ] `Pace (session average)` settles on a believable min/km once you have
-      moved 100 m or so. Walking is usually 8:00–13:00, easy running 5:00–7:00.
-      It should not jump wildly every second.
-- [ ] `Live pace` moves around more than the average (it comes from the phone's
-      instantaneous speed) and shows `--:--` when you stop moving.
-- [ ] `GPS accuracy` shows a number in metres, usually ±5 m to ±15 m outdoors.
-- [ ] **Stop** freezes every number. They do not keep counting.
-- [ ] **Reset session** puts everything back to zero.
-- [ ] Nothing new appears in the database or on the web dashboard — this screen
-      must not save anything.
+- [ ] `Current pace` settles on a believable min/km once you have moved 100 m or
+      so. Walking is usually 8:00–13:00, easy running 5:00–7:00. It comes from
+      the phone's instantaneous speed, so it moves around, but it should not
+      jump wildly every second, and it shows `--:--` when you stop moving.
+- [ ] The pace trace fills in left to right as fixes arrive.
+- [ ] **Finish** takes you to the summary, and distance, time and `Avg /km`
+      there match the numbers you last saw on the run screen.
+- [ ] Nothing new appears in the database or on the web dashboard — the app
+      must not save anything yet.
 
 ### Known limitation: locking the screen
 
@@ -84,9 +83,8 @@ Apple Developer account for iOS. Test with the screen on for now.
 
 ### If you cannot go outside
 
-Report `Signal: Too weak` plus the accuracy value rather than the distance —
-indoor fixes are deliberately ignored above ±30 m, so distance staying at 0.00
-indoors is correct behaviour.
+Indoor fixes are deliberately ignored above ±30 m accuracy, so distance staying
+at 0.00 indoors is correct behaviour — report that rather than a distance bug.
 
 ---
 
@@ -102,8 +100,8 @@ npx expo start          # then press "i" to open the simulator
 ```
 
 In the simulator menu bar: **Features → Location → Freeway Drive**. The
-simulator then "drives" a route, so the GPS test screen fills in distance and
-pace with no movement on your part. Note the drive is at car speed, so the pace
+simulator then "drives" a route, so the run screen fills in distance and pace
+with no movement on your part. Note the drive is at car speed, so the pace
 will read very fast (~0:30/km) — you are checking that the numbers *move
 sensibly and consistently*, not that the pace is realistic.
 **Features → Location → Custom Location…** sets a single fixed point, useful for
@@ -113,7 +111,7 @@ checking that a stationary device adds no distance.
 route, set a speed, press **Play route**.
 
 **No Mac, no emulator**: run the app in a desktop browser with
-`cd mobile && npx expo start --web`, open `/gps-test`, then fake a route in
+`cd mobile && npx expo start --web`, start a run, then fake a route in
 Chrome DevTools → **⋮ → More tools → Sensors → Location → Manage → add a custom
 location**. Changing the coordinates feeds the app a new fix each time, so you
 can step through a route by hand. This checks the pace/distance maths only —
@@ -196,8 +194,7 @@ Include:
 1. Which client (web / Expo Go on iPhone / Expo Go on Android), the OS version,
    and the Expo Go version (Expo Go → bottom of the home tab).
 2. What you did, what you expected, what happened.
-3. For GPS bugs: the `GPS accuracy`, the fix count, and the distance/pace/time
-   shown, plus whether you were indoors, walking or running. A screenshot of the
-   screen is ideal.
+3. For GPS bugs: the distance/pace/time shown, plus whether you were indoors,
+   walking or running. A screenshot of the screen is ideal.
 4. Whether the phone screen was on and the app in the foreground the whole time.
 5. For the web app: the browser console output.

@@ -15,7 +15,7 @@ full test script.
 
 ## Screens
 
-The seven screens from the design brief, in flow order:
+The screens from the design brief, in flow order:
 
 - `app/index.tsx` – 00 Launch. One-shot mark/wordmark/tagline animation, then Home.
 - `app/home.tsx` – 01 Home. Personal Best pace and a single `Run` action.
@@ -24,8 +24,6 @@ The seven screens from the design brief, in flow order:
 - `app/baseline.tsx` – 04 Baseline setup: faster/slower/on target, coach, Strava toggle.
 - `app/run.tsx` – 05 Active run: pace trace, rolling pace, target zone, coach caption.
 - `app/summary.tsx` – 06 Summary: distance, time, average pace, coach verdict.
-- `app/gps-test.tsx` – standalone foreground GPS session: Start/Stop, live pace,
-  distance, elapsed time and accuracy. Writes nothing to the database.
 
 ## Brand
 
