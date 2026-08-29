@@ -6,113 +6,108 @@ import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { coachVoiceClipPath, coachVoices, type CoachId } from "@shared/voices";
 
-type Voice = {
-  id: string;
-  name: string;
-  tag: string;
-  pole: "rival" | "ally";
-  brief: string;
-  duration: string;
-  lines: string[];
+/** Landing-page framing for each voice; the lines themselves are shared. */
+const blurbs: Partial<Record<CoachId, { tag: string; brief: string }>> = {
+  "ex-female": {
+    tag: "Most played",
+    brief: "Approval, but only on her terms.",
+  },
+  "ex-male": {
+    tag: "Gaslighting, but cardio",
+    brief: "Certain you said a slower target. You didn't.",
+  },
+  mum: {
+    tag: "Emotional damage: affectionate",
+    brief: "Worried, proud, and asking about water.",
+  },
+  sergeant: {
+    tag: "Volume warning",
+    brief: "No excuses. None. Not even that one.",
+  },
+  coach: {
+    tag: "For the serious ones",
+    brief: "Calm, clear, actually about your splits.",
+  },
+  nan: {
+    tag: "Fan favourite",
+    brief: "Sweet as anything. Absolutely feral about splits.",
+  },
 };
 
-const voices: Voice[] = [
-  {
-    id: "ex-female",
-    name: "The Ex (female)",
-    tag: "Most played",
-    pole: "rival",
-    brief: "Approval, but only on her terms.",
-    duration: "0:07",
-    lines: [
-      "You've never been fit enough for me. But keep going, it's sweet.",
-      "I'd say I'm proud of you, but you'd only slow down.",
-      "See, you can do it. You just needed me to be disappointed first.",
-    ],
-  },
-  {
-    id: "ex-male",
-    name: "The Ex (male)",
-    tag: "Gaslighting, but cardio",
-    pole: "rival",
-    brief: "Certain you said a slower target. You didn't.",
-    duration: "0:07",
-    lines: [
-      "You said five minutes a kilometre. No — you said five thirty. I remember.",
-      "Calm down. I'm being supportive. This is supportive.",
-      "That wasn't your PB. You're thinking of a different run.",
-    ],
-  },
-  {
-    id: "mum",
-    name: "Mum",
-    tag: "Emotional damage: affectionate",
-    pole: "ally",
-    brief: "Worried, proud, and asking about water.",
-    duration: "0:09",
-    lines: [
-      "Have you had water? No? Have water.",
-      "You're doing so well. I've told the whole street.",
-      "One more kilometre and then a proper dinner, please.",
-    ],
-  },
-  {
-    id: "sergeant",
-    name: "Drill Sergeant",
-    tag: "Volume warning",
-    pole: "rival",
-    brief: "No excuses. None. Not even that one.",
-    duration: "0:05",
-    lines: [
-      "That hill has a name and the name is YOURS.",
-      "You slowed down. I felt it. The satellites felt it.",
-      "Move those legs before I come round there.",
-    ],
-  },
-  {
-    id: "nan",
-    name: "Nan, Unhinged",
-    tag: "Fan favourite",
-    pole: "ally",
-    brief: "Sweet as anything. Absolutely feral about splits.",
-    duration: "0:08",
-    lines: [
-      "Lovely form, darling. Now destroy him.",
-      "I've put a fiver on you. Do not embarrass me.",
-      "There's a scone at the end of this. Earn the scone.",
-    ],
-  },
-];
+const voices = coachVoices
+  .filter((voice) => voice.id in blurbs)
+  .map((voice) => ({
+    ...voice,
+    tag: blurbs[voice.id]?.tag ?? "",
+    brief: blurbs[voice.id]?.brief ?? "",
+  }));
 
-const PREVIEW_MS = 2600;
+type Voice = (typeof voices)[number];
+
+const SILENT_PREVIEW_MS = 2600;
 const TICK_MS = 60;
 
 export function VoiceSampler() {
   const [activeId, setActiveId] = useState(voices[0].id);
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [playingId, setPlayingId] = useState<CoachId | null>(null);
   const [progress, setProgress] = useState(0);
+  const [lineIndex, setLineIndex] = useState(0);
+  /** Set once a clip request fails, e.g. no API key configured on the server. */
+  const [audioUnavailable, setAudioUnavailable] = useState(false);
+  const audio = useRef<HTMLAudioElement | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const ticks = useRef(0);
 
   const active = voices.find((voice) => voice.id === activeId) ?? voices[0];
+  const line = active.lines[lineIndex % active.lines.length].text;
 
-  useEffect(
-    () => () => {
-      if (timer.current) {
-        clearInterval(timer.current);
+  useEffect(() => {
+    const playback = audio;
+    const interval = timer;
+
+    return () => {
+      if (interval.current) {
+        clearInterval(interval.current);
       }
-    },
-    [],
-  );
+
+      playback.current?.pause();
+    };
+  }, []);
 
   function stop() {
     if (timer.current) {
       clearInterval(timer.current);
       timer.current = null;
     }
+
+    if (audio.current) {
+      audio.current.pause();
+      audio.current.src = "";
+      audio.current = null;
+    }
+
     setPlayingId(null);
     setProgress(0);
+  }
+
+  /** Waveform-only stand-in, used when the server can't produce audio. */
+  function playSilently(voice: Voice) {
+    ticks.current = 0;
+    timer.current = setInterval(() => {
+      ticks.current += 1;
+      const ratio = (ticks.current * TICK_MS) / SILENT_PREVIEW_MS;
+
+      if (ratio >= 1) {
+        stop();
+        return;
+      }
+
+      setProgress(ratio);
+    }, TICK_MS);
+
+    setPlayingId(voice.id);
   }
 
   function play(voice: Voice) {
@@ -123,26 +118,40 @@ export function VoiceSampler() {
 
     stop();
     setActiveId(voice.id);
+
+    const next = voice.id === active.id ? lineIndex + 1 : 0;
+    setLineIndex(next);
+
+    if (audioUnavailable) {
+      playSilently(voice);
+      return;
+    }
+
+    const element = new Audio(
+      coachVoiceClipPath(voice.id, next % voice.lines.length),
+    );
+
+    element.addEventListener("timeupdate", () => {
+      if (element.duration > 0) {
+        setProgress(element.currentTime / element.duration);
+      }
+    });
+    element.addEventListener("ended", () => stop());
+    element.addEventListener("error", () => {
+      setAudioUnavailable(true);
+      stop();
+      playSilently(voice);
+    });
+
+    audio.current = element;
     setPlayingId(voice.id);
 
-    ticks.current = 0;
-    timer.current = setInterval(() => {
-      ticks.current += 1;
-      const ratio = (ticks.current * TICK_MS) / PREVIEW_MS;
-
-      if (ratio >= 1) {
-        stop();
-        return;
-      }
-
-      setProgress(ratio);
-    }, TICK_MS);
+    void element.play().catch(() => {
+      setAudioUnavailable(true);
+      stop();
+      playSilently(voice);
+    });
   }
-
-  const lineIndex = Math.min(
-    active.lines.length - 1,
-    Math.floor(progress * active.lines.length),
-  );
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_0.85fr]">
@@ -191,7 +200,7 @@ export function VoiceSampler() {
                   </span>
                 </span>
                 <span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
-                  {voice.duration}
+                  {voice.lines.length} lines
                 </span>
               </button>
             </li>
@@ -251,7 +260,7 @@ export function VoiceSampler() {
                 Press play on a voice. Nothing bad will happen, probably.
               </span>
             ) : (
-              <span>&ldquo;{active.lines[lineIndex]}&rdquo;</span>
+              <span>&ldquo;{line}&rdquo;</span>
             )}
           </p>
         </div>
@@ -267,9 +276,9 @@ export function VoiceSampler() {
           </Button>
           <p className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
             <Wand2 className="mt-0.5 size-3.5 shrink-0" />
-            Placeholder preview. Real audio arrives with the ElevenLabs
-            integration, along with cloning the voice of someone who genuinely
-            annoys you.
+            {audioUnavailable
+              ? "Audio is offline right now, so this is the silent preview. Real ElevenLabs playback returns as soon as the voices are back."
+              : "Real ElevenLabs voices. Press play again for the next line — cloning someone who genuinely annoys you comes later."}
           </p>
         </div>
       </div>

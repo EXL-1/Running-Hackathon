@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatDistanceKm, formatDuration, formatPace } from "@shared/tracking";
+import type { LineTrigger } from "@shared/voices";
 import { JarLogo } from "../src/components/JarLogo";
 import { Screen } from "../src/components/ui";
 import { session } from "../src/session";
 import { font, theme } from "../src/theme";
+import { useCoachVoice } from "../src/useCoachVoice";
 import { useRunTracker } from "../src/useRunTracker";
 
 const TRACE_POINTS = 24;
@@ -49,14 +51,32 @@ export default function Run() {
   const onTarget = Math.abs(drift) <= 10;
   const zoneOffset = Math.max(0, Math.min(1, 0.5 + drift / 120));
 
-  const caption =
+  /**
+   * Which side of the aim pace you are on decides which of the selected
+   * coach's lines is spoken; holding the aim pace with the personal best in
+   * reach is its own state.
+   */
+  const trigger: LineTrigger =
     livePace === null
-      ? "Warming up — waiting for a clean fix."
-      : onTarget
-        ? "“Nice — hold right there.”"
-        : drift > 0
-          ? "“You're drifting. Give me ten seconds back.”"
-          : "“That's quicker than usual. Keep it honest.”";
+      ? "start"
+      : drift > 10
+        ? "behind"
+        : livePace <= session.personalBestSecondsPerKm
+          ? "pb-in-sight"
+          : "ahead";
+
+  const spoken = useCoachVoice(trigger);
+
+  const caption =
+    spoken !== null
+      ? `“${spoken}”`
+      : livePace === null
+        ? "Warming up — waiting for a clean fix."
+        : onTarget
+          ? "“Nice — hold right there.”"
+          : drift > 0
+            ? "“You're drifting. Give me ten seconds back.”"
+            : "“That's quicker than usual. Keep it honest.”";
 
   function finish() {
     tracker.stop();

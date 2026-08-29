@@ -13,6 +13,33 @@ npx expo start --tunnel   # phone on mobile data / different network
 Open the printed link in **Expo Go**. See [../TESTING.md](../TESTING.md) for the
 full test script.
 
+## Coach voices
+
+Clips come from the Next.js app's `/api/coach-voice`, which holds the ElevenLabs
+key, so point the app at it — a phone cannot reach the host's `localhost`:
+
+```bash
+EXPO_PUBLIC_API_URL=http://192.168.1.20:3000 npx expo start
+```
+
+Choosing a coach preloads that coach's clips (`src/voice.ts`) so a run can
+narrate without the network.
+
+Only the selected voice is heard during a run; GPS pace against the aim pace
+decides which of its lines fires (`shared/voices.ts`, `src/useCoachVoice.ts`):
+
+| Pace state    | When                                        | Reads as                                                                |
+| ------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
+| `start`       | before the first clean fix                  | the voice arriving — "Move. Now." / "Oh, you run now?"                   |
+| `behind`      | rolling pace >10s/km slower than aim        | rivals taunt and are mixed closer, allies coax                          |
+| `ahead`       | at or faster than aim                       | rivals concede grudgingly, allies are delighted                          |
+| `pb-in-sight` | at or faster than the personal best pace    | the one push line per voice                                             |
+| `finish`      | on the summary screen                       | the verdict                                                             |
+
+A prompt fires the moment you cross the aim pace, then at most every ~45s while
+the state holds, cycling through that state's lines so nothing repeats
+back-to-back.
+
 ## Screens
 
 The screens from the design brief, in flow order:
@@ -41,6 +68,7 @@ it needs a map module in a development build; the pace trace panel stands in.
 - `app/` – expo-router file routes.
 - `src/components/ui.tsx` – Screen, Title, Body, Eyebrow, Chip, Button.
 - `src/session.ts` – in-memory run setup (coach, primer seen, baseline answer).
+- `src/voice.ts` – coach clip URLs and preloading, via `expo-audio`.
 - `src/useRunTracker.ts` – `expo-location` subscription, session state.
 - `src/theme.ts` – brand colour and type tokens.
 - `../shared/tracking.ts` – haversine distance, fix filtering and pace maths,

@@ -5,6 +5,7 @@ import { formatDistanceKm, formatDuration, formatPace } from "@shared/tracking";
 import { Button, Eyebrow, Screen } from "../src/components/ui";
 import { session } from "../src/session";
 import { font, theme } from "../src/theme";
+import { useCoachVoice } from "../src/useCoachVoice";
 
 /**
  * 06 — Summary. A run is saved locally and to Health before Strava is ever
@@ -31,6 +32,8 @@ export default function Summary() {
           ? "Slower than baseline"
           : "On target";
 
+  const spoken = useCoachVoice("finish");
+
   return (
     <Screen style={styles.screen}>
       <Eyebrow>Run complete</Eyebrow>
@@ -48,6 +51,10 @@ export default function Summary() {
           <Text style={styles.metricLabel}>Coach verdict</Text>
         </View>
       </View>
+
+      {spoken === null ? null : (
+        <Text style={styles.spoken}>“{spoken}”</Text>
+      )}
 
       <View style={styles.actions}>
         <Button label="Saved · Synced to Health ✓" onPress={() => {}} />
@@ -75,6 +82,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 36,
     marginTop: 4,
+  },
+  spoken: {
+    color: theme.text,
+    fontFamily: font.body,
+    fontSize: 15,
+    lineHeight: 21,
+    backgroundColor: theme.card,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: theme.radius,
+    padding: 16,
   },
   metric: {
     flex: 1,
