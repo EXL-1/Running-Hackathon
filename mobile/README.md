@@ -25,6 +25,21 @@ EXPO_PUBLIC_API_URL=http://192.168.1.20:3000 npx expo start
 Choosing a coach preloads that coach's clips (`src/voice.ts`) so a run can
 narrate without the network.
 
+Only the selected voice is heard during a run; GPS pace against the aim pace
+decides which of its lines fires (`shared/voices.ts`, `src/useCoachVoice.ts`):
+
+| Pace state    | When                                        | Reads as                                                                |
+| ------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
+| `start`       | before the first clean fix                  | the voice arriving — "Move. Now." / "Oh, you run now?"                   |
+| `behind`      | rolling pace >10s/km slower than aim        | rivals taunt and are mixed closer, allies coax                          |
+| `ahead`       | at or faster than aim                       | rivals concede grudgingly, allies are delighted                          |
+| `pb-in-sight` | at or faster than the personal best pace    | the one push line per voice                                             |
+| `finish`      | on the summary screen                       | the verdict                                                             |
+
+A prompt fires the moment you cross the aim pace, then at most every ~45s while
+the state holds, cycling through that state's lines so nothing repeats
+back-to-back.
+
 ## Screens
 
 The seven screens from the design brief, in flow order:

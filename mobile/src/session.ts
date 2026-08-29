@@ -3,7 +3,7 @@
  * primer has been shown, and today's baseline answer. Nothing is persisted yet
  * — the screens read it so the Tap Run flow can skip steps already satisfied.
  */
-import { coachVoices, type CoachId } from "@shared/voices";
+import { coachVoices, type CoachId, type CoachLine } from "@shared/voices";
 
 export type { CoachId };
 
@@ -11,8 +11,8 @@ export type Coach = {
   id: CoachId;
   name: string;
   descriptor: string;
-  /** Preview lines, in the voice's own ElevenLabs voice. */
-  lines: string[];
+  /** Every line this voice can speak, tagged with the pace state that fires it. */
+  lines: CoachLine[];
 };
 
 const descriptors: Record<CoachId, string> = {

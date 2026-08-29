@@ -28,7 +28,7 @@ export async function speakCoachLine(
   voice: CoachVoice,
   line: number,
 ): Promise<SpeechResult> {
-  const text = voice.lines[line];
+  const text = voice.lines[line]?.text;
 
   if (!text) {
     return { status: "failed", message: "No such line." };

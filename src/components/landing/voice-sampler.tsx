@@ -26,6 +26,10 @@ const blurbs: Partial<Record<CoachId, { tag: string; brief: string }>> = {
     tag: "Volume warning",
     brief: "No excuses. None. Not even that one.",
   },
+  coach: {
+    tag: "For the serious ones",
+    brief: "Calm, clear, actually about your splits.",
+  },
   nan: {
     tag: "Fan favourite",
     brief: "Sweet as anything. Absolutely feral about splits.",
@@ -57,7 +61,7 @@ export function VoiceSampler() {
   const ticks = useRef(0);
 
   const active = voices.find((voice) => voice.id === activeId) ?? voices[0];
-  const line = active.lines[lineIndex % active.lines.length];
+  const line = active.lines[lineIndex % active.lines.length].text;
 
   useEffect(() => {
     const playback = audio;
