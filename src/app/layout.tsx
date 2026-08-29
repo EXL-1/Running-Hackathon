@@ -13,15 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Runaway — run away from your ex",
-  description: "A running game that puts your ex — or your mum — in your ear while you run.",
+  title: "Peanutbuttol — be your personal best",
+  description:
+    "A voice-led pace coach: your arch-enemy taunts you when you drift off pace, someone who loves you carries you when your PB is in sight.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

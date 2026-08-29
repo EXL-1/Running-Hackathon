@@ -17,7 +17,7 @@ export function WaitlistForm() {
 
   if (submitted) {
     return (
-      <p className="bg-muted rounded-lg px-4 py-3 text-center text-sm">
+      <p className="border-primary/30 bg-primary/10 text-primary rounded-2xl border px-4 py-4 text-center text-sm font-medium">
         You&apos;re on the list. Start warming up.
       </p>
     );
@@ -26,7 +26,9 @@ export function WaitlistForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" className="text-eyebrow text-muted-foreground">
+          Email
+        </Label>
         <Input
           id="email"
           type="email"
@@ -34,9 +36,10 @@ export function WaitlistForm() {
           placeholder="you@example.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          className="bg-card h-12 rounded-full px-5"
         />
       </div>
-      <Button type="submit" className="w-full">
+      <Button type="submit" size="lg" className="h-12 w-full rounded-full">
         Join the waitlist
       </Button>
       <p className="text-muted-foreground text-center text-xs">

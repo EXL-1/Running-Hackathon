@@ -1,6 +1,6 @@
-# Running Hackathon
+# Peanutbuttol
 
-Web app built with Next.js (App Router), TypeScript, Tailwind CSS v4 and shadcn/ui.
+Be your personal best. Web app built with Next.js (App Router), TypeScript, Tailwind CSS v4 and shadcn/ui.
 
 ## Getting started
 
