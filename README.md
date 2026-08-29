@@ -11,10 +11,13 @@ The page is a prototype: the voice showcase replays scripted lines, the pace tim
 
 ```bash
 npm install
+cp .env.example .env.local   # fill in Supabase URL, secret key and session secret
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000 for the landing page, or http://localhost:3000/start
+for the app itself. See [docs/backend.md](docs/backend.md) for the Supabase
+setup, the schema and how accounts get added later.
 
 ## Scripts
 
@@ -29,11 +32,12 @@ Open http://localhost:3000.
 - `src/app` – routes, root layout and global styles
 - `src/components/landing` – landing sections (`ModeShowcase`, `PaceTimeline`, `WaitlistForm`)
 - `src/components/ui` – shadcn/ui primitives
+- `src/lib/player`, `src/lib/runs`, `src/lib/supabase` – server-side player identity, runs and Supabase access
 - `src/lib/utils.ts` – shared helpers (`cn`)
 
 ## Stack
 
-Next.js (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui and Radix UI, Lucide icons.
+Next.js (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui and Radix UI, Lucide icons, Supabase.
 
 ## Adding components
 
