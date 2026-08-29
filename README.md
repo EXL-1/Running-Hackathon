@@ -1,11 +1,11 @@
-# Runaway
+# Peanut Butter
 
-Landing page for Runaway, a running app that narrates your run in real time. Pick a voice before you head out and it reacts to your pace, splits and distance markers.
+Landing page for Peanut Butter, a voice-led pace coach built around one goal: be your personal best. Set an aim pace before you head out and two voices react to your pace, splits and location.
 
-- **Chase mode** – something (or someone) is behind you; slow down and they gain on you.
-- **Cheer mode** – gentle pacing tips and encouragement all the way to the finish.
+- **Arch-enemy** – drop under your aim pace and they close in on you.
+- **Loved one** – hold your pace and they carry you to the PB.
 
-The page is a prototype: the mode showcase replays scripted lines and the waitlist form does not persist anything.
+The page is a prototype: the voice showcase replays scripted lines, the pace timeline is a static mock and the waitlist form does not persist anything.
 
 ## Getting started
 
@@ -27,7 +27,7 @@ Open http://localhost:3000.
 ## Project structure
 
 - `src/app` – routes, root layout and global styles
-- `src/components/landing` – landing sections (`ModeShowcase`, `WaitlistForm`)
+- `src/components/landing` – landing sections (`ModeShowcase`, `PaceTimeline`, `WaitlistForm`)
 - `src/components/ui` – shadcn/ui primitives
 - `src/lib/utils.ts` – shared helpers (`cn`)
 
