@@ -22,7 +22,11 @@ you close the app.
 
 ### Setup (2 minutes)
 
-1. Install **Expo Go** on your phone (App Store / Play Store).
+1. Install **Expo Go** on your phone (App Store / Play Store) and make sure it is
+   on the latest version — Expo Go only runs the newest SDK, so an Expo Go that
+   has not been updated shows "incompatible with this version of Expo Go" and
+   refuses to open the project. The app targets Expo SDK 57, which needs Expo Go
+   2.25.1 or newer (iOS 16+).
 2. Ask whoever is hosting the dev server (a teammate's laptop, or Devin's VM) to
    run:
    ```bash
@@ -108,6 +112,13 @@ checking that a stationary device adds no distance.
 **Android emulator**: **Extended controls (…) → Location → Routes**, draw a
 route, set a speed, press **Play route**.
 
+**No Mac, no emulator**: run the app in a desktop browser with
+`cd mobile && npx expo start --web`, open `/gps-test`, then fake a route in
+Chrome DevTools → **⋮ → More tools → Sensors → Location → Manage → add a custom
+location**. Changing the coordinates feeds the app a new fix each time, so you
+can step through a route by hand. This checks the pace/distance maths only —
+permissions, background behaviour and battery use have to be tested on a phone.
+
 For a realistic run, import a GPX file: in the Android emulator use
 **Location → Load GPX/KML**; in the iOS Simulator use
 **Debug → Simulate Location → Add GPX File to Project**.
@@ -182,7 +193,8 @@ curl -s localhost:3000/api/runs -H "authorization: Bearer $TOKEN"
 
 Include:
 
-1. Which client (web / Expo Go on iPhone / Expo Go on Android) and OS version.
+1. Which client (web / Expo Go on iPhone / Expo Go on Android), the OS version,
+   and the Expo Go version (Expo Go → bottom of the home tab).
 2. What you did, what you expected, what happened.
 3. For GPS bugs: the `GPS accuracy`, the fix count, and the distance/pace/time
    shown, plus whether you were indoors, walking or running. A screenshot of the
