@@ -6,10 +6,13 @@ Web app built with Next.js (App Router), TypeScript, Tailwind CSS v4 and shadcn/
 
 ```bash
 npm install
+cp .env.example .env.local   # fill in Supabase URL, secret key and session secret
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000 for the landing page, or http://localhost:3000/start
+for the app itself. See [docs/backend.md](docs/backend.md) for the Supabase
+setup, the schema and how accounts get added later.
 
 ## Scripts
 
