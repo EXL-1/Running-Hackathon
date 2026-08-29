@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Runaway
 
-## Getting Started
+Landing page for Runaway, a running app that narrates your run in real time. Pick a voice before you head out and it reacts to your pace, splits and distance markers.
 
-First, run the development server:
+- **Chase mode** – something (or someone) is behind you; slow down and they gain on you.
+- **Cheer mode** – gentle pacing tips and encouragement all the way to the finish.
+
+The page is a prototype: the mode showcase replays scripted lines and the waitlist form does not persist anything.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` – dev server
+- `npm run build` – production build
+- `npm start` – serve the production build
+- `npm run lint` – ESLint
+- `npx tsc --noEmit` – typecheck (run a build first so route types are generated)
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app` – routes, root layout and global styles
+- `src/components/landing` – landing sections (`ModeShowcase`, `WaitlistForm`)
+- `src/components/ui` – shadcn/ui primitives
+- `src/lib/utils.ts` – shared helpers (`cn`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Next.js (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui and Radix UI, Lucide icons.
 
-## Deploy on Vercel
+## Adding components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx shadcn@latest add <component>
+```

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Running Hackathon",
-  description: "LLLA hackathon web app",
+  title: "Runaway — run away from your ex",
+  description: "A running game that puts your ex — or your mum — in your ear while you run.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
