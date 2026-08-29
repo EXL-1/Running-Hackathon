@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import * as z from "zod";
 
+import { nextOnboardingStep } from "@/lib/onboarding/steps";
 import { claimUsernameSchema, type FormState } from "@/lib/player/schemas";
 import { clearPlayerSession, writePlayerSession } from "@/lib/player/session";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -31,7 +32,7 @@ export async function claimUsername(
       { username: parsed.data.username, last_seen_at: new Date().toISOString() },
       { onConflict: "username" },
     )
-    .select("id")
+    .select("id, goal_kind, prompt_frequency, onboarding_completed_at")
     .single();
 
   if (error || !data) {
@@ -39,7 +40,14 @@ export async function claimUsername(
   }
 
   await writePlayerSession(data.id);
-  redirect("/dashboard");
+
+  const step = nextOnboardingStep({
+    goalKind: data.goal_kind,
+    promptFrequency: data.prompt_frequency,
+    onboardingCompletedAt: data.onboarding_completed_at,
+  });
+
+  redirect(step?.href ?? "/dashboard");
 }
 
 export async function switchPlayer() {
