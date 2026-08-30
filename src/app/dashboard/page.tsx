@@ -22,7 +22,7 @@ const goalLabels = {
 } as const;
 
 export const metadata: Metadata = {
-  title: "Your runs — Runaway",
+  title: "Your runs — Peanut Butter",
 };
 
 function formatDuration(seconds: number) {

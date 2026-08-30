@@ -24,7 +24,7 @@ export function VoiceSampleHelp() {
   return (
     <div className="flex flex-col gap-3 text-sm">
       <p className="text-muted-foreground">
-        Runaway needs one clip of them talking — a voice note is perfect. Save it
+        Peanut Butter needs one clip of them talking — a voice note is perfect. Save it
         to your phone or computer, then drop it in below.
       </p>
       <ul className="divide-border divide-y">

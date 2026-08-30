@@ -5,7 +5,7 @@ import { PromptFrequencyForm } from "@/components/onboarding/prompt-frequency-fo
 import { requirePlayer } from "@/lib/player/current";
 
 export const metadata: Metadata = {
-  title: "Prompts — Runaway",
+  title: "Prompts — Peanut Butter",
 };
 
 export default async function PromptsPage() {

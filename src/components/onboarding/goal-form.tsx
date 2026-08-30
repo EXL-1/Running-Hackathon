@@ -49,7 +49,7 @@ export function GoalForm({ defaultGoalKind, defaultPaceSPerKm }: GoalFormProps) 
     <form action={action} className="flex flex-col gap-6">
       <fieldset className="flex flex-col gap-3">
         <legend className="text-sm font-medium">
-          What do you want from Runaway?
+          What do you want from Peanut Butter?
         </legend>
         <div className="grid gap-3 sm:grid-cols-2">
           {goalOptions.map((option) => (
