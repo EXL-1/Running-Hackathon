@@ -1,3 +1,5 @@
+import "server-only";
+
 function required(name: string, value: string | undefined) {
   if (!value) {
     throw new Error(

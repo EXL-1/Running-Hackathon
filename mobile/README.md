@@ -19,7 +19,11 @@ Clips come from the Next.js app's `/api/coach-voice`, which holds the ElevenLabs
 key, so point the app at it — a phone cannot reach the host's `localhost`:
 
 ```bash
+# Dev — replace with your machine's LAN IP
 EXPO_PUBLIC_API_URL=http://192.168.1.20:3000 npx expo start
+
+# Production — point at the deployed Next.js API on Vercel
+EXPO_PUBLIC_API_URL=https://peanutbutter.fitness npx expo start
 ```
 
 Choosing a coach preloads that coach's clips (`src/voice.ts`) so a run can

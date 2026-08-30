@@ -12,7 +12,7 @@ import type { VoiceStatus } from "@/lib/supabase/database.types";
 import { listVoices } from "@/lib/voice/service";
 
 export const metadata: Metadata = {
-  title: "Voice — Runaway",
+  title: "Voice — Peanut Butter",
 };
 
 const statusLabels: Record<VoiceStatus, string> = {

@@ -12,7 +12,7 @@ import {
 import { getCurrentPlayer } from "@/lib/player/current";
 
 export const metadata: Metadata = {
-  title: "Pick your username — Runaway",
+  title: "Pick your username — Peanut Butter",
 };
 
 export default async function StartPage() {

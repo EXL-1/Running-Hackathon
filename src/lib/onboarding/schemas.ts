@@ -89,7 +89,14 @@ export const voiceUploadSchema = z.object({
     .refine((file) => file.size > 0, { error: "That file is empty." })
     .refine((file) => file.size <= MAX_SAMPLE_BYTES, {
       error: "Keep the clip under 10 MB.",
-    }),
+    })
+    .refine(
+      (file) =>
+        ACCEPTED_SAMPLE_TYPES.includes(
+          file.type as (typeof ACCEPTED_SAMPLE_TYPES)[number],
+        ),
+      { error: "Use an mp3, m4a, wav, ogg or mp4 audio file." },
+    ),
 });
 
 /**

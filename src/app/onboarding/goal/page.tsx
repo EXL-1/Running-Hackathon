@@ -5,7 +5,7 @@ import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { requirePlayer } from "@/lib/player/current";
 
 export const metadata: Metadata = {
-  title: "Your goal — Runaway",
+  title: "Your goal — Peanut Butter",
 };
 
 export default async function GoalPage() {
