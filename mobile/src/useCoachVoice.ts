@@ -2,8 +2,9 @@ import { useAudioPlayer } from "expo-audio";
 import { useEffect, useRef, useState } from "react";
 
 import type { LineTrigger } from "@shared/voices";
-import { session } from "./session";
-import { coachClipUrl } from "./voice";
+import { findCoach } from "./session";
+import { usePlayer } from "./player";
+import { coachClipSource } from "./voice";
 
 const TICK_MS = 15_000;
 /** Ticks to wait before repeating a prompt while the pace state is unchanged. */
@@ -16,6 +17,8 @@ const TICKS_BETWEEN_PROMPTS = 3;
  * spoken so the screen caption can show it.
  */
 export function useCoachVoice(trigger: LineTrigger | null) {
+  const { player: profile } = usePlayer();
+  const coach = findCoach(profile?.coachVoiceId);
   const player = useAudioPlayer();
   const [spoken, setSpoken] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -30,8 +33,6 @@ export function useCoachVoice(trigger: LineTrigger | null) {
   }, []);
 
   useEffect(() => {
-    const coach = session.coach;
-
     if (!trigger || !coach) {
       return;
     }
@@ -56,10 +57,10 @@ export function useCoachVoice(trigger: LineTrigger | null) {
     lastTick.current = tick;
     cursor.current += 1;
 
-    player.replace({ uri: coachClipUrl(coach.id, line.index) });
+    player.replace(coachClipSource(coach.id, line.index));
     player.play();
     setSpoken(line.text);
-  }, [player, tick, trigger]);
+  }, [coach, player, tick, trigger]);
 
   return spoken;
 }

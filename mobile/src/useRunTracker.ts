@@ -54,7 +54,12 @@ export function useRunTracker() {
   const distance = useRef(0);
 
   const teardown = useCallback(() => {
-    subscription.current?.remove();
+    try {
+      subscription.current?.remove();
+    } catch {
+      // expo-location's web emitter has no removeSubscription (SDK 54), so
+      // removing a web subscription throws. Nothing else to unwind.
+    }
     subscription.current = null;
 
     if (ticker.current) {

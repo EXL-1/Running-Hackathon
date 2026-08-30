@@ -10,13 +10,24 @@ npx expo start            # same Wi-Fi as the phone
 npx expo start --tunnel   # phone on mobile data / different network
 ```
 
-Open the printed link in **Expo Go**. See [../TESTING.md](../TESTING.md) for the
-full test script.
+Expo SDK 54. Open the printed link in **Expo Go**. See
+[../TESTING.md](../TESTING.md) for the full test script.
 
-## Coach voices
+## Username, not login
 
-Clips come from the Next.js app's `/api/coach-voice`, which holds the ElevenLabs
-key, so point the app at it — a phone cannot reach the host's `localhost`:
+First launch asks for a username and nothing else: `POST /api/auth/session`
+creates the player row (or reuses it) and returns a signed token, which the app
+keeps in `expo-secure-store` and sends as `Authorization: Bearer` on every
+request (`src/api.ts`). There is no password, so a username is a handle rather
+than an account — anyone who types it becomes that player.
+
+`src/player.tsx` holds the player and their run totals, and is the only place
+screens talk to the API from: coach choice and target pace go to
+`PATCH /api/players/me`, a finished run to `POST /api/runs`, and Home's personal
+best comes from `GET /api/runs`. Live GPS stays in memory during the run and is
+saved once, on **Finish**.
+
+Point the app at an API the phone can reach — `localhost` is the phone itself:
 
 ```bash
 # Dev — replace with your machine's LAN IP
@@ -26,8 +37,16 @@ EXPO_PUBLIC_API_URL=http://192.168.1.20:3000 npx expo start
 EXPO_PUBLIC_API_URL=https://peanutbutter.fitness npx expo start
 ```
 
-Choosing a coach preloads that coach's clips (`src/voice.ts`) so a run can
-narrate without the network.
+The API sends no CORS headers, so `--web` only works if the bundle and the API
+share an origin — put a reverse proxy in front of both when testing in a
+browser. Native builds are unaffected.
+
+## Coach voices
+
+Clips come from the same `EXPO_PUBLIC_API_URL` app's `/api/coach-voice`, which
+holds the ElevenLabs key. Choosing a coach downloads that coach's clips into the
+cache directory (`src/voice.ts`) so a run can narrate without the network, and
+falls back to streaming the URL when a clip is missing.
 
 Only the selected voice is heard during a run; GPS pace against the aim pace
 decides which of its lines fires (`shared/voices.ts`, `src/useCoachVoice.ts`):
@@ -48,7 +67,9 @@ back-to-back.
 
 The screens from the design brief, in flow order:
 
-- `app/index.tsx` – 00 Launch. One-shot mark/wordmark/tagline animation, then Home.
+- `app/index.tsx` – 00 Launch. One-shot mark/wordmark/tagline animation, then
+  Home, or Username on a phone with no stored player.
+- `app/username.tsx` – pick the username everything is tracked against.
 - `app/home.tsx` – 01 Home. Personal Best pace and a single `Run` action.
 - `app/permission.tsx` – 02 Location primer, shown once before the OS prompt.
 - `app/coach.tsx` – 03 Choose your coach (Mum, The Ex, Drill Sergeant, Classic Coach).
@@ -71,8 +92,11 @@ it needs a map module in a development build; the pace trace panel stands in.
 
 - `app/` – expo-router file routes.
 - `src/components/ui.tsx` – Screen, Title, Body, Eyebrow, Chip, Button.
-- `src/session.ts` – in-memory run setup (coach, primer seen, baseline answer).
-- `src/voice.ts` – coach clip URLs and preloading, via `expo-audio`.
+- `src/api.ts` – API client and the stored session token.
+- `src/player.tsx` – `usePlayer()`: the player, their runs totals and personal
+  best, and every write back to the API.
+- `src/session.ts` – in-memory run setup (primer seen, baseline answer).
+- `src/voice.ts` – coach clip URLs and caching, via `expo-file-system`.
 - `src/useRunTracker.ts` – `expo-location` subscription, session state.
 - `src/theme.ts` – brand colour and type tokens.
 - `../shared/tracking.ts` – haversine distance, fix filtering and pace maths,

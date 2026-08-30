@@ -8,6 +8,7 @@ export type RunMode = "chase" | "cheer";
 export type GoalKind = "increase_pace" | "target_pace";
 export type VoiceStatus = "uploaded" | "cloning" | "ready" | "failed";
 export type VoiceSentiment = "love" | "hate";
+export type RunBaseline = "faster" | "slower" | "on-target";
 
 export type Database = {
   public: {
@@ -23,6 +24,7 @@ export type Database = {
           goal_kind: GoalKind | null;
           target_pace_s_per_km: number | null;
           prompt_frequency: number | null;
+          coach_voice_id: string | null;
           onboarding_completed_at: string | null;
         };
         Insert: {
@@ -34,6 +36,7 @@ export type Database = {
           goal_kind?: GoalKind | null;
           target_pace_s_per_km?: number | null;
           prompt_frequency?: number | null;
+          coach_voice_id?: string | null;
           onboarding_completed_at?: string | null;
         };
         Update: {
@@ -43,6 +46,7 @@ export type Database = {
           goal_kind?: GoalKind | null;
           target_pace_s_per_km?: number | null;
           prompt_frequency?: number | null;
+          coach_voice_id?: string | null;
           onboarding_completed_at?: string | null;
         };
         Relationships: [];
@@ -91,6 +95,9 @@ export type Database = {
           points: number;
           started_at: string;
           created_at: string;
+          coach_voice_id: string | null;
+          baseline: RunBaseline | null;
+          avg_pace_s_per_km: number | null;
         };
         Insert: {
           id?: string;
@@ -100,6 +107,8 @@ export type Database = {
           duration_s: number;
           points?: number;
           started_at?: string;
+          coach_voice_id?: string | null;
+          baseline?: RunBaseline | null;
         };
         Update: {
           mode?: RunMode;
@@ -107,6 +116,8 @@ export type Database = {
           duration_s?: number;
           points?: number;
           started_at?: string;
+          coach_voice_id?: string | null;
+          baseline?: RunBaseline | null;
         };
         Relationships: [];
       };
@@ -118,6 +129,7 @@ export type Database = {
       goal_kind: GoalKind;
       voice_status: VoiceStatus;
       voice_sentiment: VoiceSentiment;
+      run_baseline: RunBaseline;
     };
     CompositeTypes: Record<never, never>;
   };

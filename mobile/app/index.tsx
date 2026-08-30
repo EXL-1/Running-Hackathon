@@ -3,16 +3,19 @@ import { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 
 import { JarLogo } from "../src/components/JarLogo";
+import { usePlayer } from "../src/player";
 import { font, palette, theme } from "../src/theme";
 
 const LAUNCH_MS = 1100;
 
 /**
  * 00 — Launch. Plays once, never loops: the jar mark in its running pose, the
- * wordmark, then the tagline, then straight to Home.
+ * wordmark, then the tagline, then Home — or the username screen the first
+ * time, while the stored token is still being checked.
  */
 export default function Launch() {
   const router = useRouter();
+  const { status } = usePlayer();
   const mark = useRef(new Animated.Value(0)).current;
   const wordmark = useRef(new Animated.Value(0)).current;
   const tagline = useRef(new Animated.Value(0)).current;
@@ -36,11 +39,20 @@ export default function Launch() {
         useNativeDriver: true,
       }),
     ]).start();
+  }, [mark, tagline, wordmark]);
 
-    const handoff = setTimeout(() => router.replace("/home"), LAUNCH_MS);
+  useEffect(() => {
+    if (status === "loading") {
+      return;
+    }
+
+    const handoff = setTimeout(
+      () => router.replace(status === "ready" ? "/home" : "/username"),
+      LAUNCH_MS,
+    );
 
     return () => clearTimeout(handoff);
-  }, [mark, router, tagline, wordmark]);
+  }, [router, status]);
 
   return (
     <View style={styles.screen}>

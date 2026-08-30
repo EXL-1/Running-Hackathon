@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isCoachId, type CoachId } from "@shared/voices";
 import type { GoalKind } from "@/lib/supabase/database.types";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -10,6 +11,7 @@ export type Player = {
   goalKind: GoalKind | null;
   targetPaceSPerKm: number | null;
   promptFrequency: number | null;
+  coachVoiceId: CoachId | null;
   onboardingCompletedAt: string | null;
 };
 
@@ -20,11 +22,12 @@ type PlayerRow = {
   goal_kind: GoalKind | null;
   target_pace_s_per_km: number | null;
   prompt_frequency: number | null;
+  coach_voice_id: string | null;
   onboarding_completed_at: string | null;
 };
 
 export const PLAYER_COLUMNS =
-  "id, username, display_name, goal_kind, target_pace_s_per_km, prompt_frequency, onboarding_completed_at";
+  "id, username, display_name, goal_kind, target_pace_s_per_km, prompt_frequency, coach_voice_id, onboarding_completed_at";
 
 export function toPlayer(row: PlayerRow): Player {
   return {
@@ -34,6 +37,10 @@ export function toPlayer(row: PlayerRow): Player {
     goalKind: row.goal_kind,
     targetPaceSPerKm: row.target_pace_s_per_km,
     promptFrequency: row.prompt_frequency,
+    coachVoiceId:
+      row.coach_voice_id !== null && isCoachId(row.coach_voice_id)
+        ? row.coach_voice_id
+        : null,
     onboardingCompletedAt: row.onboarding_completed_at,
   };
 }

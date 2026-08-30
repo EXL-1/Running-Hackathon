@@ -1,7 +1,8 @@
 import "server-only";
 
+import { isCoachId, type CoachId } from "@shared/voices";
 import type { CreateRunInput } from "@/lib/player/schemas";
-import type { RunMode } from "@/lib/supabase/database.types";
+import type { RunBaseline, RunMode } from "@/lib/supabase/database.types";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export type Run = {
@@ -11,6 +12,9 @@ export type Run = {
   durationS: number;
   points: number;
   startedAt: string;
+  coachVoiceId: CoachId | null;
+  baseline: RunBaseline | null;
+  avgPaceSPerKm: number | null;
 };
 
 type RunRow = {
@@ -20,9 +24,18 @@ type RunRow = {
   duration_s: number;
   points: number;
   started_at: string;
+  coach_voice_id: string | null;
+  baseline: RunBaseline | null;
+  avg_pace_s_per_km: number | null;
 };
 
-const RUN_COLUMNS = "id, mode, distance_m, duration_s, points, started_at";
+const RUN_COLUMNS =
+  "id, mode, distance_m, duration_s, points, started_at, coach_voice_id, baseline, avg_pace_s_per_km";
+
+/** A coach removed from `shared/voices.ts` reads as no coach rather than one. */
+function coachIdOrNull(id: string | null) {
+  return id !== null && isCoachId(id) ? id : null;
+}
 
 function toRun(row: RunRow): Run {
   return {
@@ -32,6 +45,9 @@ function toRun(row: RunRow): Run {
     durationS: row.duration_s,
     points: row.points,
     startedAt: row.started_at,
+    coachVoiceId: coachIdOrNull(row.coach_voice_id),
+    baseline: row.baseline,
+    avgPaceSPerKm: row.avg_pace_s_per_km,
   };
 }
 
@@ -77,6 +93,30 @@ export async function getRunTotals(playerId: string) {
   };
 }
 
+/**
+ * Fastest run so far, used as the target on the app's home screen. Very short
+ * runs are ignored: a 40 m sprint out of the door is not a personal best.
+ */
+export const PERSONAL_BEST_MIN_DISTANCE_M = 400;
+
+export async function getPersonalBest(playerId: string) {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("runs")
+    .select(RUN_COLUMNS)
+    .eq("player_id", playerId)
+    .gte("distance_m", PERSONAL_BEST_MIN_DISTANCE_M)
+    .order("avg_pace_s_per_km", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data ? toRun(data) : null;
+}
+
 export async function createRun(playerId: string, input: CreateRunInput) {
   const supabase = createServiceClient();
   const { data, error } = await supabase
@@ -88,6 +128,8 @@ export async function createRun(playerId: string, input: CreateRunInput) {
       duration_s: input.durationS,
       points: pointsForRun(input),
       started_at: input.startedAt ?? new Date().toISOString(),
+      coach_voice_id: input.coachVoiceId ?? null,
+      baseline: input.baseline ?? null,
     })
     .select(RUN_COLUMNS)
     .single();

@@ -1,5 +1,6 @@
 import * as z from "zod";
 
+import { coachVoiceIdSchema } from "@/lib/player/schemas";
 import {
   MAX_PACE_S_PER_KM,
   MIN_PACE_S_PER_KM,
@@ -108,6 +109,7 @@ export const playerOnboardingPatchSchema = z
     goalKind: z.enum(goalKinds).optional(),
     targetPaceSPerKm: paceSecondsSchema.optional(),
     promptFrequency: promptFrequencySchema.shape.promptFrequency.optional(),
+    coachVoiceId: coachVoiceIdSchema.optional(),
     onboardingCompleted: z.literal(true).optional(),
   })
   .refine(

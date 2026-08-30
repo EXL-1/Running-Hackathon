@@ -6,6 +6,7 @@ import { createRunSchema } from "@/lib/player/schemas";
 import {
   createRun,
   DEFAULT_RUN_LIMIT,
+  getPersonalBest,
   getRunTotals,
   listRuns,
   MAX_RUN_LIMIT,
@@ -36,12 +37,19 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const [runs, { runCount, totalPoints }] = await Promise.all([
+  const [runs, { runCount, totalPoints }, personalBest] = await Promise.all([
     listRuns(player.id, limit.data),
     getRunTotals(player.id),
+    getPersonalBest(player.id),
   ]);
 
-  return Response.json({ runs, limit: limit.data, runCount, totalPoints });
+  return Response.json({
+    runs,
+    limit: limit.data,
+    runCount,
+    totalPoints,
+    personalBest,
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -60,5 +68,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return Response.json({ run: await createRun(player.id, parsed.data) }, { status: 201 });
+  const run = await createRun(player.id, parsed.data);
+  const [{ runCount, totalPoints }, personalBest] = await Promise.all([
+    getRunTotals(player.id),
+    getPersonalBest(player.id),
+  ]);
+
+  return Response.json(
+    { run, runCount, totalPoints, personalBest },
+    { status: 201 },
+  );
 }

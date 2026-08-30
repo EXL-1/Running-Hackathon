@@ -27,6 +27,9 @@ export async function applyOnboardingPatch(
       ...(patch.promptFrequency !== undefined
         ? { prompt_frequency: patch.promptFrequency }
         : {}),
+      ...(patch.coachVoiceId !== undefined
+        ? { coach_voice_id: patch.coachVoiceId }
+        : {}),
       ...(patch.onboardingCompleted
         ? { onboarding_completed_at: new Date().toISOString() }
         : {}),

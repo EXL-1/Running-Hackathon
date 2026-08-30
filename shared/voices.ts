@@ -250,6 +250,17 @@ export function findCoachVoice(id: string): CoachVoice | undefined {
   return coachVoices.find((voice) => voice.id === id);
 }
 
+export const coachIds = coachVoices.map((voice) => voice.id);
+
+export function isCoachId(id: string): id is CoachId {
+  return coachVoices.some((voice) => voice.id === id);
+}
+
+/** Rivals chase you down, allies cheer you on — the two run modes on `runs`. */
+export function coachRunMode(id: CoachId): "chase" | "cheer" {
+  return findCoachVoice(id)?.pole === "rival" ? "chase" : "cheer";
+}
+
 /**
  * Line indices a voice can use in a given pace state, in clip terms — the run
  * loop picks one of these and plays `coachVoiceClipPath(voice.id, index)`.
