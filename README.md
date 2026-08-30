@@ -4,6 +4,8 @@
 
 **Live site:** [https://peanutbutter.fitness](https://peanutbutter.fitness)
 
+**Repository:** [github.com/EXL-1/Running-Hackathon](https://github.com/EXL-1/Running-Hackathon) (default branch: `main`)
+
 Set an aim pace before you head out. Two voice modes push you along:
 
 - **Chase (arch-enemy)** — drop below your aim pace and they close in on you.
