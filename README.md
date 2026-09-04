@@ -1,5 +1,7 @@
 # Peanut Butter
 
+> 🏃‍♂️ **Built in 5.5 hours during the LLLA Running Hackathon** at the London Stadium Community Track (Queen Elizabeth Olympic Park).
+
 **Spread the pace.** A voice-led running coach that reacts to your GPS pace in real time.
 
 **Live site:** [https://peanutbutter.fitness](https://peanutbutter.fitness)
